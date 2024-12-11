@@ -179,7 +179,14 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         Icon = priceTable.Icon,
                         Price = priceTable.Price,
                         VillaId = priceTable.VillaId,
-                        RoomId = priceTable.RoomId
+                        RoomId = priceTable.RoomId,
+                        PriceTableDetails = priceTable.PriceTableDetails.Select(priceTableDetail => new PriceTableGetAllResponseDtoPriceTableDetail()
+                        {
+                            Id = priceTableDetail.Id,
+                            Title = priceTableDetail.Title,
+                            Description = priceTableDetail.Description,
+                            LanguageCode = priceTableDetail.LanguageCode
+                        }).ToList()
                     })
                     .AsNoTracking()
                     .ToListAsync();

@@ -599,29 +599,25 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
         {
             try
             {
-                // Todo: Test edilecek.
 
-                var villaCategories = await context.VillaCategories.Where(x => x.VillaId == model.VillaId).ToListAsync();
-                villaCategories.RemoveRange(0, villaCategories.Count);
+                List<VillaCategory> ListVillaCategories  = await context.VillaCategories
+                    .AsNoTracking()
+                    .Where(x => x.VillaId == model.VillaId)
+                    .ToListAsync();
 
-                var categories = await context.Categories.Where(x => model.CategoryIds.Contains(x.Id)).ToListAsync();
+                context.VillaCategories.RemoveRange(ListVillaCategories);
+                //-----
 
-                List<VillaCategory> villaCategories1 = new List<VillaCategory>();
-                foreach (var category in categories)
+                List<VillaCategory> AddVillaCategories = new List<VillaCategory>();
+                foreach (var category in model.CategoryIds)
                 {
-                    villaCategories1.Add(new() { VillaId = model.VillaId, Category = category });
+                    AddVillaCategories.Add(new() { VillaId = model.VillaId, CategoryId = category });
                 }
+                await context.VillaCategories.AddRangeAsync(AddVillaCategories);
+                //-----
 
-                await context.VillaCategories.AddRangeAsync(villaCategories1);
                 await context.SaveChangesAsync();
-
-
-                //Villa villa = await _context.Villas.Include(x => x.VillaCategories).ThenInclude(x => x.Category).SingleOrDefaultAsync(x => x.Id == model.VillaId);
-                //List<Category> categories = await _context.Categories.Where(x => model.CategoryIds.Contains(x.Id)).ToListAsync();
-                //villa.Categories?.RemoveRange(0, villa.Categories.Count);
-                //villa.Categories = categories;
-
-                //await _context.SaveChangesAsync();
+                //-----
 
                 return ResponseDto<BaseResponseDto>.Success(new() { Id = model.VillaId }, 200);
             }

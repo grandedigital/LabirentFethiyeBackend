@@ -15,7 +15,7 @@ namespace LabirentFethiye.WebApi.Controllers
         {
             _mailService = mailService;
         }
-
+        // kjasghdjkashdkaskjdahn
         [HttpGet]
         public async Task<IActionResult> Index()
         {

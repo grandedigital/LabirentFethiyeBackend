@@ -105,8 +105,6 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     {
                         Id = distanceRuler.Id,
                         Icon = distanceRuler.Icon,
-                        VillaId = distanceRuler.VillaId,
-                        HotelId = distanceRuler.HotelId,
                         Value = distanceRuler.Value,
                         DistanceRulerDetails = distanceRuler.DistanceRulerDetails.Select(distanceRulerDetail => new DistanceRulerGetResponseDtoDistanceRulerDetail()
                         {
@@ -114,27 +112,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                             LanguageCode = distanceRulerDetail.LanguageCode,
                             Name = distanceRulerDetail.Name,
 
-                        }).ToList(),
-                        Villa = new DistanceRulerGetResponseDtoVilla()
-                        {
-                            Id = distanceRuler.Villa.Id,
-                            VillaDetails = distanceRuler.Villa.VillaDetails.Select(distanceRulerVillaDetail => new DistanceRulerGetResponseDtoVillaDetail()
-                            {
-                                Id = distanceRulerVillaDetail.Id,
-                                LanguageCode = distanceRulerVillaDetail.LanguageCode,
-                                Name = distanceRulerVillaDetail.Name,
-                            }).ToList(),
-                        },
-                        Hotel = new DistanceRulerGetResponseDtoHotel()
-                        {
-                            Id = distanceRuler.Villa.Id,
-                            HotelDetails = distanceRuler.Hotel.HotelDetails.Select(distanceRulerHotelDetail => new DistanceRulerGetResponseDtoHotelDetail()
-                            {
-                                Id = distanceRulerHotelDetail.Id,
-                                LanguageCode = distanceRulerHotelDetail.LanguageCode,
-                                Name = distanceRulerHotelDetail.Name,
-                            }).ToList(),
-                        }
+                        }).ToList()                       
                     })
                     .AsNoTracking()
                     .FirstOrDefaultAsync(x => x.Id == Id);
@@ -153,7 +131,16 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             {
                 var query = context.DistanceRulers
                     .AsQueryable()
-                    .Where(x => x.GeneralStatusType == GeneralStatusType.Active)
+                    .Where(x => x.GeneralStatusType == GeneralStatusType.Active);
+
+                if (VillaId is not null)
+                    query = query.Where(x => x.VillaId == VillaId);
+
+                else if (HotelId is not null)
+                    query = query.Where(x => x.HotelId == HotelId);
+
+                var getDistanceRulers = await query
+                    .AsNoTracking()
                     .Select(distanceRuler => new DistanceRulerGetAllResponseDto()
                     {
                         Id = distanceRuler.Id,
@@ -164,33 +151,8 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                             Id = distanceRulerDetail.Id,
                             LanguageCode = distanceRulerDetail.LanguageCode,
                             Name = distanceRulerDetail.Name,
-                        }).ToList(),
-                        VillaId = distanceRuler.VillaId,
-                        Villa = new DistanceRulerGetAllResponseDtoVilla()
-                        {
-                            Id = distanceRuler.Villa.Id,
-                            VillaDetails = distanceRuler.Villa.VillaDetails.Select(distanceRulerVillaDetail => new DistanceRulerGetAllResponseDtoVillaDetail()
-                            {
-                                Id = distanceRulerVillaDetail.Id,
-                                LanguageCode = distanceRulerVillaDetail.LanguageCode,
-                                Name = distanceRulerVillaDetail.Name,
-                            }).ToList(),
-                        },
-                        HotelId = distanceRuler.HotelId,
-                        Hotel = new DistanceRulerGetAllResponseDtoHotel()
-                        {
-                            Id = distanceRuler.Villa.Id,
-                            HotelDetails = distanceRuler.Hotel.HotelDetails.Select(distanceRulerHotelDetail => new DistanceRulerGetAllResponseDtoHotelDetail()
-                            {
-                                Id = distanceRulerHotelDetail.Id,
-                                LanguageCode = distanceRulerHotelDetail.LanguageCode,
-                                Name = distanceRulerHotelDetail.Name,
-                            }).ToList(),
-                        }
-                    });
-
-                var getDistanceRulers = await query
-                    .AsNoTracking()
+                        }).ToList()
+                    })
                     .ToListAsync();
 
                 return ResponseDto<ICollection<DistanceRulerGetAllResponseDto>>.Success(getDistanceRulers, 200);

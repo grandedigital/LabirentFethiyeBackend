@@ -1,0 +1,74 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35506.116 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{548AD7C0-A517-4997-932B-FA05D610C471}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{EBEEE482-9C8D-44DA-AA82-0CC6C74CDC85}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{F24DF241-6F52-4AC4-BD86-96C23C3EA00E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{F1EA862D-CF49-402B-B77F-7B2F427032AB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{4D2748AB-DF75-4FA2-8788-D7F2563989A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LabirentFethiye.Common", "Source\Common\LabirentFethiye.Common\LabirentFethiye.Common.csproj", "{C495F3AB-CE01-4358-A6BC-E7A277475640}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LabirentFethiye.Domain", "Source\Core\LabirentFethiye.Domain\LabirentFethiye.Domain.csproj", "{2E4735E0-865F-4912-9D61-E538B3600A38}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LabirentFethiye.Application", "Source\Core\LabirentFethiye.Application\LabirentFethiye.Application.csproj", "{15F42FC5-F205-49D9-91DF-8DBDF34FA751}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LabirentFethiye.Infastructure", "Source\Infrastructure\LabirentFethiye.Infastructure\LabirentFethiye.Infastructure.csproj", "{8C69FFB1-206B-4B51-B6A9-CB5C54A10AED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LabirentFethiye.Persistence", "Source\Infrastructure\LabirentFethiye.Persistence\LabirentFethiye.Persistence.csproj", "{6A770B3B-0E8D-43A5-8597-F56DF314463F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LabirentFethiye.WebApi", "Source\Presentation\LabirentFethiye.WebApi\LabirentFethiye.WebApi.csproj", "{13A771D0-0895-4002-A5F7-43522B0CE37E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C495F3AB-CE01-4358-A6BC-E7A277475640}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C495F3AB-CE01-4358-A6BC-E7A277475640}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C495F3AB-CE01-4358-A6BC-E7A277475640}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C495F3AB-CE01-4358-A6BC-E7A277475640}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E4735E0-865F-4912-9D61-E538B3600A38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E4735E0-865F-4912-9D61-E538B3600A38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E4735E0-865F-4912-9D61-E538B3600A38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E4735E0-865F-4912-9D61-E538B3600A38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15F42FC5-F205-49D9-91DF-8DBDF34FA751}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15F42FC5-F205-49D9-91DF-8DBDF34FA751}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15F42FC5-F205-49D9-91DF-8DBDF34FA751}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15F42FC5-F205-49D9-91DF-8DBDF34FA751}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C69FFB1-206B-4B51-B6A9-CB5C54A10AED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C69FFB1-206B-4B51-B6A9-CB5C54A10AED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C69FFB1-206B-4B51-B6A9-CB5C54A10AED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C69FFB1-206B-4B51-B6A9-CB5C54A10AED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A770B3B-0E8D-43A5-8597-F56DF314463F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A770B3B-0E8D-43A5-8597-F56DF314463F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A770B3B-0E8D-43A5-8597-F56DF314463F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A770B3B-0E8D-43A5-8597-F56DF314463F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13A771D0-0895-4002-A5F7-43522B0CE37E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13A771D0-0895-4002-A5F7-43522B0CE37E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13A771D0-0895-4002-A5F7-43522B0CE37E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13A771D0-0895-4002-A5F7-43522B0CE37E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EBEEE482-9C8D-44DA-AA82-0CC6C74CDC85} = {548AD7C0-A517-4997-932B-FA05D610C471}
+		{F24DF241-6F52-4AC4-BD86-96C23C3EA00E} = {548AD7C0-A517-4997-932B-FA05D610C471}
+		{F1EA862D-CF49-402B-B77F-7B2F427032AB} = {548AD7C0-A517-4997-932B-FA05D610C471}
+		{4D2748AB-DF75-4FA2-8788-D7F2563989A6} = {548AD7C0-A517-4997-932B-FA05D610C471}
+		{C495F3AB-CE01-4358-A6BC-E7A277475640} = {EBEEE482-9C8D-44DA-AA82-0CC6C74CDC85}
+		{2E4735E0-865F-4912-9D61-E538B3600A38} = {F24DF241-6F52-4AC4-BD86-96C23C3EA00E}
+		{15F42FC5-F205-49D9-91DF-8DBDF34FA751} = {F24DF241-6F52-4AC4-BD86-96C23C3EA00E}
+		{8C69FFB1-206B-4B51-B6A9-CB5C54A10AED} = {F1EA862D-CF49-402B-B77F-7B2F427032AB}
+		{6A770B3B-0E8D-43A5-8597-F56DF314463F} = {F1EA862D-CF49-402B-B77F-7B2F427032AB}
+		{13A771D0-0895-4002-A5F7-43522B0CE37E} = {4D2748AB-DF75-4FA2-8788-D7F2563989A6}
+	EndGlobalSection
+EndGlobal

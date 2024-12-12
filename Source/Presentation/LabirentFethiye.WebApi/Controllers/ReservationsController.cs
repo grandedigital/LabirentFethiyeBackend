@@ -47,11 +47,11 @@ namespace LabirentFethiye.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllForVilla([FromQuery] Pagination pagination, [FromQuery] GetAllReservationRequestDto model)
+        public async Task<IActionResult> GetAllForVilla([FromQuery] GetAllReservationRequestDto model)
         {
             try
             {
-                var GetAllReservation = await reservationService.GetAllForVilla(pagination, model);
+                var GetAllReservation = await reservationService.GetAllForVilla(model);
                 return StatusCode(GetAllReservation.StatusCode, GetAllReservation);
             }
             catch (Exception ex)
@@ -61,11 +61,11 @@ namespace LabirentFethiye.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllForRoom([FromQuery] Pagination pagination, [FromQuery] GetAllReservationRequestDto model)
+        public async Task<IActionResult> GetAllForRoom([FromQuery] GetAllReservationRequestDto model)
         {
             try
             {
-                var GetAllReservation = await reservationService.GetAllForRoom(pagination, model);
+                var GetAllReservation = await reservationService.GetAllForRoom( model);
                 return StatusCode(GetAllReservation.StatusCode, GetAllReservation);
             }
             catch (Exception ex)

@@ -8,8 +8,8 @@ namespace LabirentFethiye.Application.Abstracts.ProjectInterfaces
     public interface IReservationService
     {
         Task<ResponseDto<ICollection<ReservationGetAllResponseDto>>> GetAll( GetAllReservationRequestDto model);
-        Task<ResponseDto<ICollection<ReservationGetAllResponseDto>>> GetAllForVilla(Pagination pagination, GetAllReservationRequestDto model);
-        Task<ResponseDto<ICollection<ReservationGetAllResponseDto>>> GetAllForRoom(Pagination pagination, GetAllReservationRequestDto model);
+        Task<ResponseDto<ICollection<ReservationGetAllResponseDto>>> GetAllForVilla(GetAllReservationRequestDto model);
+        Task<ResponseDto<ICollection<ReservationGetAllResponseDto>>> GetAllForRoom(GetAllReservationRequestDto model);
         Task<ResponseDto<ReservationGetResponseDto>> Get(Guid Id);
         Task<ResponseDto<BaseResponseDto>> Create(ReservationCreateRequestDto model, Guid userId);
         Task<ResponseDto<BaseResponseDto>> Update(ReservationUpdateRequestDto model, Guid userId);

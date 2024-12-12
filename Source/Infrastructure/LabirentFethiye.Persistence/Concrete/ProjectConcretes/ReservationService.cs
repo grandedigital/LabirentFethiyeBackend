@@ -283,7 +283,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             catch (Exception ex) { return ResponseDto<ReservationGetResponseDto>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500); }
         }
 
-        public async Task<ResponseDto<ICollection<ReservationGetAllResponseDto>>> GetAll( GetAllReservationRequestDto model)
+        public async Task<ResponseDto<ICollection<ReservationGetAllResponseDto>>> GetAll(GetAllReservationRequestDto model)
         {
             try
             {
@@ -1012,113 +1012,86 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             catch (Exception ex) { return ResponseDto<ICollection<ReservationGetAllResponseDto>>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500); }
         }
 
-        public async Task<ResponseDto<ICollection<ReservationGetAllResponseDto>>> GetAllForRoom(Pagination pagination, GetAllReservationRequestDto model)
+        public async Task<ResponseDto<ICollection<ReservationGetAllResponseDto>>> GetAllForRoom(GetAllReservationRequestDto model)
         {
             try
             {
                 // Todo: Bu servis yenilendi. Çok detaylı Test yapılacak
-                #region Delgetes
-                Expression<Func<Reservation, string>> orderByString = null;
-                Expression<Func<Reservation, string>> orderByDescendingString = null;
+                var query = context.Reservations
+                      .AsNoTracking()
+                      .AsQueryable()
+                      .Where(x => x.GeneralStatusType == GeneralStatusType.Active && x.RoomId == model.RoomId);
 
-                Expression<Func<Reservation, decimal>> orderByDecimal = null;
-                Expression<Func<Reservation, decimal>> orderByDescendingDecimal = null;
 
-                Expression<Func<Reservation, ReservationStatusType>> orderByInt = null;
-                Expression<Func<Reservation, ReservationStatusType>> orderByDescendingInt = null;
+                if (!model.HomeOwner && model.AgencyOwner)
+                    query = query.Where(x => x.HomeOwner == false);
+                else if (model.HomeOwner && !model.AgencyOwner)
+                    query = query.Where(x => x.HomeOwner == true); ;
 
-                Expression<Func<Reservation, DateTime>> orderByDateTime = null;
-                Expression<Func<Reservation, DateTime>> orderByDescendingDateTime = null;
 
-                var predicate = PredicateBuilder.False<Reservation>();
-                predicate = predicate.Or(p => p.RoomId == model.RoomId);
+                if (!String.IsNullOrEmpty(model.CustomerSearchName))
+                    query = query.Where(x => x.ReservationInfos.Any(x => x.Owner == true && x.Name.Contains(model.CustomerSearchName)));
 
-                if (!model.HomeOwner && model.AgencyOwner) predicate = predicate.And(p => p.HomeOwner == false);
-                else if (model.HomeOwner && !model.AgencyOwner) predicate = predicate.And(p => p.HomeOwner == true);
 
-                if (!String.IsNullOrEmpty(model.CustomerSearchName)) predicate = predicate.And(p => p.ReservationInfos.Any(x => x.Owner == true && x.Name.Contains(model.CustomerSearchName)));
-
-                #endregion
-
-                #region Filterings
 
                 if (model.OrderByCustomerName != null)
                 {
                     // +OrderByCustomerName
-
                     if (model.OrderByCustomerName == true)
-                        orderByString = e => e.ReservationInfos.FirstOrDefault().Name;
+                        query = query
+                            .Select(x => new { Item = x, FirstReservationName = x.ReservationInfos.FirstOrDefault().Name })
+                            .OrderBy(x => x.FirstReservationName)
+                            .Select(x => x.Item);
                     else
-                        orderByDescendingString = e => e.ReservationInfos.FirstOrDefault().Name;
+                        query = query
+                            .Select(x => new { Item = x, FirstReservationName = x.ReservationInfos.FirstOrDefault().Name })
+                            .OrderByDescending(x => x.FirstReservationName)
+                            .Select(x => x.Item);
                 }
                 else if (model.OrderByReservationStatus != null)
                 {
-                    // OrderByReservationStatus                        
-
+                    // +OrderByReservationStatus                        
                     if (model.OrderByReservationStatus == true)
-                        orderByInt = e => e.ReservationStatusType;
+                        query = query.OrderBy(x => x.ReservationStatusType);
                     else
-                        orderByDescendingInt = e => e.ReservationStatusType;
+                        query = query.OrderByDescending(x => x.ReservationStatusType);
                 }
                 else if (model.OrderByCheckIn != null)
                 {
-                    // +OrderByCheckIn                        
-
+                    // +OrderByCheckIn
                     if (model.OrderByCheckIn == true)
-                        orderByDateTime = e => e.CheckIn;
+                        query = query.OrderBy(x => x.CheckIn);
                     else
-                        orderByDescendingDateTime = e => e.CheckIn;
+                        query = query.OrderByDescending(x => x.CheckIn);
                 }
                 else if (model.OrderByCheckOut != null)
                 {
                     // +OrderByCheckOut
                     if (model.OrderByCheckOut == true)
-                        orderByDateTime = e => e.CheckOut;
+                        query = query.OrderBy(x => x.CheckOut);
                     else
-                        orderByDescendingDateTime = e => e.CheckOut;
+                        query = query.OrderByDescending(x => x.CheckOut);
                 }
                 else if (model.OrderByPrice != null)
                 {
                     // +OrderByPrice
                     if (model.OrderByPrice == true)
-                        orderByDecimal = e => e.Total;
+                        query = query.OrderBy(x => x.Total);
                     else
-                        orderByDescendingDecimal = e => e.Total;
+                        query = query.OrderByDescending(x => x.Total);
                 }
                 else
                 {
                     // +CreatedAt
-                    orderByDescendingDateTime = e => e.CreatedAt;
+                    query = query.OrderByDescending(x => x.CreatedAt);
                 }
 
-                #endregion
 
-                #region Queries
-
-                var result = context.Reservations
-                    .AsQueryable()
-                    .AsNoTracking()
-                    .Where(x => x.GeneralStatusType == GeneralStatusType.Active)
-                    .Where(predicate);
+                int TotalCount = query.Count();
+                query = query.Skip(model.Pagination.Page * model.Pagination.Size).Take(model.Pagination.Size);
 
 
-                // Total Count Query
-                int TotalCount = await result.CountAsync();
-
-                // Listing
-                if (orderByString != null) result = result.OrderBy(orderByString);
-                else if (orderByInt != null) result = result.OrderBy(orderByInt);
-                else if (orderByDecimal != null) result = result.OrderBy(orderByDecimal);
-                else if (orderByDateTime != null) result = result.OrderBy(orderByDateTime);
-                else if (orderByDescendingString != null) result = result.OrderBy(orderByDescendingString);
-                else if (orderByDescendingInt != null) result = result.OrderBy(orderByDescendingInt);
-                else if (orderByDescendingDecimal != null) result = result.OrderBy(orderByDescendingDecimal);
-                else result = result.OrderByDescending(orderByDescendingDateTime);
-
-                // pagination
-                result = result.Skip(pagination.Page * pagination.Size).Take(pagination.Size);
-
-                var getAllReservation = await result
+                var getAllReservation = await query
                       .Select(reservation => new ReservationGetAllResponseDto()
                       {
                           Id = reservation.Id,
@@ -1137,6 +1110,8 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                           Total = reservation.Total,
                           PriceType = reservation.PriceType,
                           RoomId = reservation.RoomId,
+                          VillaId = reservation.VillaId,
+
                           ReservationInfos = reservation.ReservationInfos.Select(reservationInfo => new ReservationGetAllResponseDtoReservationInfo()
                           {
                               Name = reservationInfo.Name,
@@ -1147,126 +1122,104 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                               Day = reservationItem.Day,
                               Price = reservationItem.Price
                           }).ToList(),
-                          Room = new() { Name = reservation.Room.RoomDetails.FirstOrDefault().Name }
+                          Villa = new()
+                          {
+                              Name = reservation.Villa.VillaDetails.FirstOrDefault().Name
+                          },
+                          Room = new()
+                          {
+                              Name = reservation.Room.RoomDetails.FirstOrDefault().Name
+                          }
                       })
                       .ToListAsync();
 
                 PageInfo pageInfo = GeneralFunctions.PageInfoHelper(Page: model.Pagination.Page, Size: model.Pagination.Size, TotalCount: TotalCount);
-
-                #endregion
 
                 return ResponseDto<ICollection<ReservationGetAllResponseDto>>.Success(getAllReservation, 200, pageInfo);
             }
             catch (Exception ex) { return ResponseDto<ICollection<ReservationGetAllResponseDto>>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500); }
         }
 
-        public async Task<ResponseDto<ICollection<ReservationGetAllResponseDto>>> GetAllForVilla(Pagination pagination, GetAllReservationRequestDto model)
+        public async Task<ResponseDto<ICollection<ReservationGetAllResponseDto>>> GetAllForVilla(GetAllReservationRequestDto model)
         {
             try
             {
                 // Todo: Bu servis yenilendi. Çok detaylı Test yapılacak
-                #region Delgetes
-                Expression<Func<Reservation, string>> orderByString = null;
-                Expression<Func<Reservation, string>> orderByDescendingString = null;
+                var query = context.Reservations
+                       .AsNoTracking()
+                       .AsQueryable()
+                       .Where(x => x.GeneralStatusType == GeneralStatusType.Active && x.VillaId == model.VillaId);
 
-                Expression<Func<Reservation, decimal>> orderByDecimal = null;
-                Expression<Func<Reservation, decimal>> orderByDescendingDecimal = null;
 
-                Expression<Func<Reservation, ReservationStatusType>> orderByInt = null;
-                Expression<Func<Reservation, ReservationStatusType>> orderByDescendingInt = null;
+                if (!model.HomeOwner && model.AgencyOwner)
+                    query = query.Where(x => x.HomeOwner == false);
+                else if (model.HomeOwner && !model.AgencyOwner)
+                    query = query.Where(x => x.HomeOwner == true); ;
 
-                Expression<Func<Reservation, DateTime>> orderByDateTime = null;
-                Expression<Func<Reservation, DateTime>> orderByDescendingDateTime = null;
 
-                var predicate = PredicateBuilder.False<Reservation>();
-                predicate = predicate.Or(p => p.VillaId == model.VillaId);
+                if (!String.IsNullOrEmpty(model.CustomerSearchName))
+                    query = query.Where(x => x.ReservationInfos.Any(x => x.Owner == true && x.Name.Contains(model.CustomerSearchName)));
 
-                if (!model.HomeOwner && model.AgencyOwner) predicate = predicate.And(p => p.HomeOwner == false);
-                else if (model.HomeOwner && !model.AgencyOwner) predicate = predicate.And(p => p.HomeOwner == true);
 
-                if (!String.IsNullOrEmpty(model.CustomerSearchName)) predicate = predicate.And(p => p.ReservationInfos.Any(x => x.Owner == true && x.Name.Contains(model.CustomerSearchName)));
-
-                #endregion
-
-                #region Filterings
 
                 if (model.OrderByCustomerName != null)
                 {
                     // +OrderByCustomerName
-
                     if (model.OrderByCustomerName == true)
-                        orderByString = e => e.ReservationInfos.FirstOrDefault().Name;
+                        query = query
+                            .Select(x => new { Item = x, FirstReservationName = x.ReservationInfos.FirstOrDefault().Name })
+                            .OrderBy(x => x.FirstReservationName)
+                            .Select(x => x.Item);
                     else
-                        orderByDescendingString = e => e.ReservationInfos.FirstOrDefault().Name;
+                        query = query
+                            .Select(x => new { Item = x, FirstReservationName = x.ReservationInfos.FirstOrDefault().Name })
+                            .OrderByDescending(x => x.FirstReservationName)
+                            .Select(x => x.Item);
                 }
                 else if (model.OrderByReservationStatus != null)
                 {
-                    // OrderByReservationStatus                        
-
+                    // +OrderByReservationStatus                        
                     if (model.OrderByReservationStatus == true)
-                        orderByInt = e => e.ReservationStatusType;
+                        query = query.OrderBy(x => x.ReservationStatusType);
                     else
-                        orderByDescendingInt = e => e.ReservationStatusType;
+                        query = query.OrderByDescending(x => x.ReservationStatusType);
                 }
                 else if (model.OrderByCheckIn != null)
                 {
-                    // +OrderByCheckIn                        
-
+                    // +OrderByCheckIn
                     if (model.OrderByCheckIn == true)
-                        orderByDateTime = e => e.CheckIn;
+                        query = query.OrderBy(x => x.CheckIn);
                     else
-                        orderByDescendingDateTime = e => e.CheckIn;
+                        query = query.OrderByDescending(x => x.CheckIn);
                 }
                 else if (model.OrderByCheckOut != null)
                 {
                     // +OrderByCheckOut
                     if (model.OrderByCheckOut == true)
-                        orderByDateTime = e => e.CheckOut;
+                        query = query.OrderBy(x => x.CheckOut);
                     else
-                        orderByDescendingDateTime = e => e.CheckOut;
+                        query = query.OrderByDescending(x => x.CheckOut);
                 }
                 else if (model.OrderByPrice != null)
                 {
                     // +OrderByPrice
                     if (model.OrderByPrice == true)
-                        orderByDecimal = e => e.Total;
+                        query = query.OrderBy(x => x.Total);
                     else
-                        orderByDescendingDecimal = e => e.Total;
+                        query = query.OrderByDescending(x => x.Total);
                 }
                 else
                 {
                     // +CreatedAt
-                    orderByDescendingDateTime = e => e.CreatedAt;
+                    query = query.OrderByDescending(x => x.CreatedAt);
                 }
 
-                #endregion
 
-                #region Queries
-
-                var result = context.Reservations
-                    .AsQueryable()
-                    .AsNoTracking()
-                    .Where(x => x.GeneralStatusType == GeneralStatusType.Active)
-                    .Where(predicate);
+                int TotalCount = query.Count();
+                query = query.Skip(model.Pagination.Page * model.Pagination.Size).Take(model.Pagination.Size);
 
 
-                // Total Count Query
-                int TotalCount = await result.CountAsync();
-
-                // Listing
-                if (orderByString != null) result = result.OrderBy(orderByString);
-                else if (orderByInt != null) result = result.OrderBy(orderByInt);
-                else if (orderByDecimal != null) result = result.OrderBy(orderByDecimal);
-                else if (orderByDateTime != null) result = result.OrderBy(orderByDateTime);
-                else if (orderByDescendingString != null) result = result.OrderBy(orderByDescendingString);
-                else if (orderByDescendingInt != null) result = result.OrderBy(orderByDescendingInt);
-                else if (orderByDescendingDecimal != null) result = result.OrderBy(orderByDescendingDecimal);
-                else result = result.OrderByDescending(orderByDescendingDateTime);
-
-                // pagination
-                result = result.Skip(pagination.Page * pagination.Size).Take(pagination.Size);
-
-                var getAllReservation = await result
+                var getAllReservation = await query
                       .Select(reservation => new ReservationGetAllResponseDto()
                       {
                           Id = reservation.Id,
@@ -1284,7 +1237,9 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                           Discount = reservation.Discount,
                           Total = reservation.Total,
                           PriceType = reservation.PriceType,
+                          RoomId = reservation.RoomId,
                           VillaId = reservation.VillaId,
+
                           ReservationInfos = reservation.ReservationInfos.Select(reservationInfo => new ReservationGetAllResponseDtoReservationInfo()
                           {
                               Name = reservationInfo.Name,
@@ -1295,14 +1250,20 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                               Day = reservationItem.Day,
                               Price = reservationItem.Price
                           }).ToList(),
-                          Villa = new() { Name = reservation.Villa.VillaDetails.FirstOrDefault().Name }
+                          Villa = new()
+                          {
+                              Name = reservation.Villa.VillaDetails.FirstOrDefault().Name
+                          },
+                          Room = new()
+                          {
+                              Name = reservation.Room.RoomDetails.FirstOrDefault().Name
+                          }
                       })
                       .ToListAsync();
 
-
                 PageInfo pageInfo = GeneralFunctions.PageInfoHelper(Page: model.Pagination.Page, Size: model.Pagination.Size, TotalCount: TotalCount);
 
-                #endregion
+                return ResponseDto<ICollection<ReservationGetAllResponseDto>>.Success(getAllReservation, 200, pageInfo);
 
                 return ResponseDto<ICollection<ReservationGetAllResponseDto>>.Success(getAllReservation, 200, pageInfo);
             }

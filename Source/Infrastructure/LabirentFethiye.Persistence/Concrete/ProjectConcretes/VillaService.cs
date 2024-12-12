@@ -450,12 +450,6 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     }
                 }
 
-
-
-
-
-
-
                 return ResponseDto<ICollection<VillaGetAllAvailableDateResponseDto>>.Success(responseModel, 200);
             }
             catch (Exception ex)

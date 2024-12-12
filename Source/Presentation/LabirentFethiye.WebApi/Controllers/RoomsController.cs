@@ -46,11 +46,11 @@ namespace LabirentFethiye.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetRoomAvailableDates([FromQuery] Guid VillaId)
+        public async Task<IActionResult> GetRoomAvailableDates([FromQuery] Guid RoomId)
         {
             try
             {
-                var rooms = await roomService.GetRoomAvailableDates(VillaId);
+                var rooms = await roomService.GetRoomAvailableDates(RoomId);
                 return StatusCode(rooms.StatusCode, rooms);
             }
             catch (Exception ex)

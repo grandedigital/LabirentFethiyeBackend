@@ -341,6 +341,7 @@ namespace LabirentFethiye.Persistence.Concrete.WebsiteConcretes
 
                 //ResimYukseklik(Path.Combine(path + "\\temp\\"), Path.Combine(path + "\\"), 960, 640, "b_", fileName); // Büyük Resim Oluşturma
                 ImageResizes.ResimYukseklik(Path.Combine(path + "\\temp\\"), Path.Combine(path + "\\"), 377, 500, "k_", fileName); // Küçük Resim Oluşturma
+                //ImageResizes.ResimYukseklik(Path.Combine(path + "\\temp\\"), Path.Combine(path + "\\"), 960, 640, "b_", fileName); // Küçük Resim Oluşturma
 
                 WebPhoto webPhoto = new()
                 {

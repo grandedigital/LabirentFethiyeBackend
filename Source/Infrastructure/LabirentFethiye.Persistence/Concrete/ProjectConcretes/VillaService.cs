@@ -295,7 +295,9 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     .AsNoTracking()
                     .ToListAsync();
 
-                return ResponseDto<ICollection<VillaGetAllResponseDto>>.Success(getAllVilla, 200);
+
+
+                return ResponseDto<ICollection<VillaGetAllResponseDto>>.Success(getAllVilla, 200, pageInfo);
 
 
 

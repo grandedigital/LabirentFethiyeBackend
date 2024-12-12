@@ -11,11 +11,11 @@ namespace LabirentFethiye.WebApi.Controllers
     public class VillasController : BaseController
     {
         private readonly IVillaService villaService;
-
         public VillasController(IVillaService villaService)
         {
             this.villaService = villaService;
         }
+
         #region Get Methods
         [HttpGet]
         public async Task<IActionResult> Get([FromRoute] Guid Id)
@@ -60,6 +60,7 @@ namespace LabirentFethiye.WebApi.Controllers
         }
         #endregion
 
+        #region Post Methods
         [HttpPost]
         public async Task<IActionResult> Create([FromForm, FromBody] VillaCreateRequestDto model)
         {
@@ -128,6 +129,7 @@ namespace LabirentFethiye.WebApi.Controllers
             {
                 return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500));
             }
-        }
+        } 
+        #endregion
     }
 }

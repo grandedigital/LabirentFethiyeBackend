@@ -383,109 +383,76 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
 
                 List<VillaGetAllAvailableDateResponseDto> responseModel = new();
 
-                #region
-                //var reservations = await _context.Reservations
-                //    .AsNoTracking()
-                //    .Where(x =>
-                //        (x.VillaId == VillaId && x.ReservationStatusType != ReservationStatusType.Cancaled) &&
-                //        (x.CheckOut.Date >= DateTime.Now.Date || x.CheckIn.Date == DateTime.Now.Date) &&
-                //        (x.CheckIn.Year >= DateTime.Now.Year && x.CheckOut.Year >= DateTime.Now.Year)
-                //    )
-                //    .OrderBy(x => x.CheckIn)
-                //    .ToListAsync();
+                var reservations = await context.Reservations
+                    .AsNoTracking()
+                    .Where(x =>
+                        (x.VillaId == VillaId && x.ReservationStatusType != ReservationStatusType.Cancaled) &&
+                        (x.CheckOut.Date >= DateTime.Now.Date || x.CheckIn.Date == DateTime.Now.Date) &&
+                        (x.CheckIn.Year >= DateTime.Now.Year && x.CheckOut.Year >= DateTime.Now.Year)
+                    )
+                    .OrderBy(x => x.CheckIn)
+                    .ToListAsync();
 
 
 
 
 
-                //if (reservations == null || reservations.Count == 0)
-                //{
-                //    responseModel.Add(new()
-                //    {
-                //        StartDate = DateTime.Now.Date.ToShortDateString(),
-                //        EndDate = "31.12." + DateTime.Now.Year.ToString(),
-                //        NightCount = ((new DateTime(DateTime.Now.Year, 12, 31).Date) - DateTime.Now.Date).Days.ToString(),
-                //        Price = ""
-                //    });
-                //}
-                //else
-                //{
-                //    for (int i = 0; i < reservations.Count; i++)
-                //    {
-                //        //if (reservations[i].CheckIn.Date > DateTime.Now && i == 0)
-                //        //{
-                //        //    responseModel.Add(new()
-                //        //    {
-                //        //        StartDate = DateTime.Now.Date.ToShortDateString(),
-                //        //        EndDate = reservations[i].CheckIn.Date.ToShortDateString(),
-                //        //        NightCount = ((new DateTime(reservations[i].CheckOut.Year, 12, 31).Date) - reservations[i].CheckOut.Date).Days.ToString(),
-                //        //        Price = ""
-                //        //    });
-                //        //}
-
-                //        if (i < reservations.Count - 1)
-                //        {
-                //            if (reservations[i].CheckIn.Date > DateTime.Now && i == 0)
-                //            {
-                //                responseModel.Add(new()
-                //                {
-                //                    StartDate = DateTime.Now.Date.ToShortDateString(),
-                //                    EndDate = reservations[i].CheckIn.Date.ToShortDateString(),
-                //                    NightCount = (reservations[i].CheckIn.Date - DateTime.Now.Date).Days.ToString(),
-                //                    Price = ""
-                //                });
-                //            }
-                //            if ((reservations[i + 1].CheckIn.Date - reservations[i].CheckOut.Date).Days > 0)
-                //            {
-                //                responseModel.Add(new()
-                //                {
-                //                    StartDate = reservations[i].CheckOut.Date.ToShortDateString(),
-                //                    EndDate = reservations[i + 1].CheckIn.Date.ToShortDateString(),
-                //                    NightCount = (reservations[i + 1].CheckIn.Date - reservations[i].CheckOut.Date).Days.ToString(),
-                //                    Price = ""
-                //                });
-                //            }
-                //        }
-                //        else
-                //        {
-                //            responseModel.Add(new()
-                //            {
-                //                StartDate = reservations[i].CheckOut.Date.ToShortDateString(),
-                //                EndDate = "31.12." + reservations[i].CheckOut.Year.ToString(),
-                //                NightCount = ((new DateTime(reservations[i].CheckOut.Year, 12, 31).Date) - reservations[i].CheckOut.Date).Days.ToString(),
-                //                Price = ""
-                //            });
-                //        }
+                if (reservations == null || reservations.Count == 0)
+                {
+                    // Full Avalible
+                    //responseModel.Add(new()
+                    //{
+                    //    StartDate = DateTime.Now.Date.ToShortDateString(),
+                    //    EndDate = "31.12." + DateTime.Now.Year.ToString(),
+                    //    NightCount = ((new DateTime(DateTime.Now.Year, 12, 31).Date) - DateTime.Now.Date).Days.ToString(),
+                    //    Price = ""
+                    //});
+                }
+                else
+                {
+                    for (int i = 0; i < reservations.Count; i++)
+                    {
+                        if (i < reservations.Count - 1)
+                        {
+                            if (reservations[i].CheckIn.Date > DateTime.Now && i == 0)
+                            {
+                                responseModel.Add(new()
+                                {
+                                    StartDate = DateTime.Now.Date.ToShortDateString(),
+                                    EndDate = reservations[i].CheckIn.Date.ToShortDateString(),
+                                    NightCount = (reservations[i].CheckIn.Date - DateTime.Now.Date).Days.ToString(),
+                                    Price = ""
+                                });
+                            }
+                            if ((reservations[i + 1].CheckIn.Date - reservations[i].CheckOut.Date).Days > 0)
+                            {
+                                responseModel.Add(new()
+                                {
+                                    StartDate = reservations[i].CheckOut.Date.ToShortDateString(),
+                                    EndDate = reservations[i + 1].CheckIn.Date.ToShortDateString(),
+                                    NightCount = (reservations[i + 1].CheckIn.Date - reservations[i].CheckOut.Date).Days.ToString(),
+                                    Price = ""
+                                });
+                            }
+                        }
+                        else
+                        {
+                            responseModel.Add(new()
+                            {
+                                StartDate = reservations[i].CheckOut.Date.ToShortDateString(),
+                                EndDate = "31.12." + reservations[i].CheckOut.Year.ToString(),
+                                NightCount = ((new DateTime(reservations[i].CheckOut.Year, 12, 31).Date) - reservations[i].CheckOut.Date).Days.ToString(),
+                                Price = ""
+                            });
+                        }
+                    }
+                }
 
 
 
 
-                //        //if (i < reservations.Count - 1)
-                //        //{
-                //        //    if ((reservations[i + 1].CheckIn.Date - reservations[i].CheckOut.Date).Days > 0)
-                //        //    {
-                //        //        responseModel.Add(new()
-                //        //        {
-                //        //            StartDate = reservations[i].CheckOut.Date.ToShortDateString(),
-                //        //            EndDate = reservations[i + 1].CheckIn.Date.ToShortDateString(),
-                //        //            NightCount = (reservations[i + 1].CheckIn.Date - reservations[i].CheckOut.Date).Days.ToString(),
-                //        //            Price = ""
-                //        //        });
-                //        //    }
-                //        //}
-                //        //else
-                //        //{
-                //        //    responseModel.Add(new()
-                //        //    {
-                //        //        StartDate = reservations[i].CheckOut.Date.ToShortDateString(),
-                //        //        EndDate = "31.12." + DateTime.Now.Year.ToString(),
-                //        //        NightCount = ((new DateTime(DateTime.Now.Year, 12, 31).Date) - reservations[i].CheckOut.Date).Days.ToString(),
-                //        //        Price = ""
-                //        //    });
-                //        //}
-                //    }
-                //}
-                #endregion
+
+
 
                 return ResponseDto<ICollection<VillaGetAllAvailableDateResponseDto>>.Success(responseModel, 200);
             }
@@ -600,7 +567,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             try
             {
 
-                List<VillaCategory> ListVillaCategories  = await context.VillaCategories
+                List<VillaCategory> ListVillaCategories = await context.VillaCategories
                     .AsNoTracking()
                     .Where(x => x.VillaId == model.VillaId)
                     .ToListAsync();

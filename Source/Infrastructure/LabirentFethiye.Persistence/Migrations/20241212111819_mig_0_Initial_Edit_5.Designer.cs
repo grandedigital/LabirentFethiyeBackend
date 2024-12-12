@@ -4,6 +4,7 @@ using LabirentFethiye.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LabirentFethiye.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241212111819_mig_0_Initial_Edit_5")]
+    partial class mig_0_Initial_Edit_5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1481,6 +1483,7 @@ namespace LabirentFethiye.Persistence.Migrations
                         .HasColumnOrder(8);
 
                     b.Property<Guid?>("RoomId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Total")
@@ -1496,6 +1499,7 @@ namespace LabirentFethiye.Persistence.Migrations
                         .HasColumnOrder(4);
 
                     b.Property<Guid?>("VillaId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -2699,12 +2703,14 @@ namespace LabirentFethiye.Persistence.Migrations
                     b.HasOne("LabirentFethiye.Domain.Entities.ProjectEntities.Room", "Room")
                         .WithMany("Reservations")
                         .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("LabirentFethiye.Domain.Entities.ProjectEntities.Villa", "Villa")
                         .WithMany("Reservations")
                         .HasForeignKey("VillaId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Room");
 

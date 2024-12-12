@@ -33,13 +33,13 @@ namespace LabirentFethiye.Persistence.Configurations.ProjectConfigurations
                 .HasOne(x => x.Villa)
                 .WithMany(x => x.Reservations)
                 .HasForeignKey(x => x.VillaId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
 
             builder
                 .HasOne(x => x.Room)
                 .WithMany(x => x.Reservations)
                 .HasForeignKey(x => x.RoomId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
                 //.IsRequired(false);
         }
     }

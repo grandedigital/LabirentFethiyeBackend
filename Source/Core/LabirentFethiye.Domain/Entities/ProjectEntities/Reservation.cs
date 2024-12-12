@@ -25,10 +25,10 @@ namespace LabirentFethiye.Domain.Entities.ProjectEntities
 
         //-----
         public Guid? VillaId { get; set; }
-        public Villa Villa { get; set; }
+        public Villa? Villa { get; set; }
 
         public Guid? RoomId { get; set; }
-        public Room Room { get; set; }
+        public Room? Room { get; set; }
 
         public ICollection<ReservationInfo> ReservationInfos { get; set; }
         public ICollection<ReservationItem> ReservationItems { get; set; }

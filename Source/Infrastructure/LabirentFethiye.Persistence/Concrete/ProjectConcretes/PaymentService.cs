@@ -81,24 +81,37 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
         {
             try
             {
-                var getAllPayment = await context.Payments
-                  .Where(x => x.GeneralStatusType == GeneralStatusType.Active)
-                  .Select(payment => new PaymentGetAllResponseDto()
-                  {
-                      Id = payment.Id,
-                      Amount = payment.Amount,
-                      CreatedAt = DateTime.Now,
-                      Description = payment.Description,
-                      InOrOut = payment.InOrOut,
-                      PriceType = payment.PriceType,
-                      PaymentTypeId = payment.PaymentTypeId,
-                      PaymentType = new PaymentGetAllResponseDtoPaymentType()
-                      {
-                          Title = payment.PaymentType.Title
-                      }
-                  })
-                  .AsNoTracking()
-                  .ToListAsync();
+                var query = context.Payments.AsNoTracking().AsQueryable().Where(x => x.GeneralStatusType == GeneralStatusType.Active);
+
+                if (model.ReservationId != null)
+                    query = query.Where(x => x.ReservationId == model.ReservationId);
+                else if (model.HotelId != null)
+                    query = query.Where(x => x.HotelId == model.HotelId);
+                else if (model.RoomId != null)
+                    query = query.Where(x => x.RoomId == model.RoomId);
+                else if (model.VillaId != null)
+                    query = query.Where(x => x.VillaId == model.VillaId);
+
+                query = query
+                    .Skip(model.Pagination.Page * model.Pagination.Size)
+                    .Take(model.Pagination.Size);
+
+                var getAllPayment = await query
+                     .Select(payment => new PaymentGetAllResponseDto()
+                     {
+                         Id = payment.Id,
+                         Amount = payment.Amount,
+                         CreatedAt = DateTime.Now,
+                         Description = payment.Description,
+                         InOrOut = payment.InOrOut,
+                         PriceType = payment.PriceType,
+                         PaymentTypeId = payment.PaymentTypeId,
+                         PaymentType = new PaymentGetAllResponseDtoPaymentType()
+                         {
+                             Title = payment.PaymentType.Title
+                         }
+                     })
+                     .ToListAsync();
 
                 return ResponseDto<ICollection<PaymentGetAllResponseDto>>.Success(getAllPayment, 200);
             }

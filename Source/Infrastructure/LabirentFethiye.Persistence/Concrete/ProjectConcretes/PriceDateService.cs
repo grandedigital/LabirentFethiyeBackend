@@ -6,6 +6,7 @@ using LabirentFethiye.Common.Responses;
 using LabirentFethiye.Domain.Entities.ProjectEntities;
 using LabirentFethiye.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.Eventing.Reader;
 
 namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
 {
@@ -29,12 +30,11 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     return ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Create Errors..", Description = "Tesis Id boş olamaz" } }, 400);
                 //------
 
-                var prices = await GetPriceForDate(new() { VillaId = model.VillaId, RoomId = model.RoomId, CheckIn = model.StartDate, CheckOut = model.EndDate });
-                if (prices.Data == null)
-                {
-                    return ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "GetPriceForDate Errors..", Description = $"Başlangıç Tarihi : {model.StartDate}, Bitiş Tarihi : {model.EndDate} olan tarihler fiyat içeriyor. Lütfen Bu tarihleri kapsayan başka bir fiyat verisi olmadığına emin olun.." } }, 400);
-                }
-                //-----
+
+                bool Validation = await PriceValidationControl(new() { VillaId = model.VillaId, RoomId = model.RoomId, CheckIn = model.StartDate, CheckOut = model.EndDate });
+
+                if (Validation)
+                    return ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Fiyat Çakışması Yaşandı..", Description = "Tesise Ait İlgili Tarihler Fiyat içeriyor. Lütfen Diğer Tarihleride Düzenleyiniz yada Fiyatları Tekrar Oluşturunuz.." } }, 400);
 
                 PriceDate priceDate = new()
                 {
@@ -123,6 +123,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         Villa = (priceDate.Villa != null ? new PriceDateGetAllResponseDtoVilla() { PriceType = priceDate.Villa.PriceType } : null),
                         Room = (priceDate.Room != null ? new PriceDateGetAllResponseDtoRoom() { PriceType = priceDate.Room.Hotel.PriceType } : null)
                     })
+                    .OrderBy(x => x.StartDate)
                     .AsNoTracking()
                     .ToListAsync();
 
@@ -147,7 +148,6 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     return ResponseDto<ICollection<PriceDateGetForDateResponseDto>>.Fail(new() { new() { Title = "GetReservationPrice Errors..", Description = "CheckIn Tarihi CheckOut tarihine eşit olamaz.." } }, 400);
                 if (model.VillaId == Guid.Empty || model.RoomId == Guid.Empty)
                     return ResponseDto<ICollection<PriceDateGetForDateResponseDto>>.Fail(new() { new() { Title = "GetReservationPrice Errors..", Description = "Tesis Id boş olamaz" } }, 400);
-
                 //-----
 
                 model.CheckOut = model.CheckOut.AddDays(-1);
@@ -159,18 +159,18 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                 if (model.Id != null)
                     query = query.Where(x => x.Id != model.Id);
 
-                if (model.VillaId != null)
-                    query = query.Where(x => (x.VillaId == model.VillaId) && ((model.CheckIn < x.StartDate && model.CheckOut >= x.StartDate) || (model.CheckIn >= x.StartDate && model.CheckIn <= x.EndDate) || (model.CheckOut >= x.StartDate && model.CheckOut <= x.EndDate)));
-
-                else if (model.RoomId != null)
-                    query = query.Where(x => (x.RoomId == model.RoomId) && ((model.CheckIn < x.StartDate && model.CheckOut >= x.StartDate) || (model.CheckIn >= x.StartDate && model.CheckIn <= x.EndDate) || (model.CheckOut >= x.StartDate && model.CheckOut <= x.EndDate)));
+                if (model.VillaId is not null)
+                    query = query.Where(x => x.VillaId == model.VillaId);
+                else if (model.RoomId is not null)
+                    query = query.Where(x => x.RoomId == model.RoomId);
 
                 List<PriceDate> priceDates = await query
+                    .Where(x => (model.CheckIn < x.EndDate && model.CheckIn > x.StartDate) || (model.CheckOut < x.EndDate && model.CheckOut > x.StartDate))
                     .OrderBy(x => x.StartDate)
                     .AsNoTracking()
                     .ToListAsync();
 
-                if (priceDates.Any(x => model.CheckIn >= x.StartDate && model.CheckIn <= x.EndDate) && priceDates.Any(x => model.CheckOut >= x.StartDate && model.CheckOut <= x.EndDate))
+                if (priceDates.Count > 0)
                 {
                     List<PriceDateGetForDateResponseDto> response = new List<PriceDateGetForDateResponseDto>();
 
@@ -184,13 +184,60 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                             fakeDay = fakeDay.AddDays(1);
                         }
                     }
-
                     return ResponseDto<ICollection<PriceDateGetForDateResponseDto>>.Success(response, 200);
-
                 }
                 else
-                    return ResponseDto<ICollection<PriceDateGetForDateResponseDto>>.Fail(new() { new() { Title = "GetReservationPrice Errors..", Description = "Tesise Ait İlgili Tarihlerin Bir Kısmı İçin Fiyat Bulunamadı.." } }, 400);
+                    return ResponseDto<ICollection<PriceDateGetForDateResponseDto>>.Fail(new() { new() { Title = "Fiyat Bulunamadı..", Description = "Tesise Ait İlgili Tarihlerin İçin Fiyat Bulunamadı.." } }, 400);
 
+                #region Eski1
+
+
+                //return ResponseDto<ICollection<PriceDateGetForDateResponseDto>>.Fail(new() { new() { Title = "test", Description = "test" } }, 400);
+
+                //if (priceDates.Count > 0)
+                //{
+                //    return ResponseDto<ICollection<PriceDateGetForDateResponseDto>>.Fail(new() { new() { Title = "GetReservationPrice Errors..", Description = "Tesise Ait İlgili Tarihlerin Bir Kısmı İçin Fiyat Bulunamadı.." } }, 400);
+                //}
+                //else
+                //{
+                //    List<PriceDateGetForDateResponseDto> response = new List<PriceDateGetForDateResponseDto>();
+
+                //    DateTime fakeDay = model.CheckIn;
+                //    foreach (var price in priceDates)
+                //    {
+                //        while (fakeDay >= price.StartDate && fakeDay <= price.EndDate)
+                //        {
+                //            if (fakeDay > model.CheckOut) break;
+                //            response.Add(new() { Date = fakeDay, Price = price.Price, PriceType = price.Villa != null ? price.Villa.PriceType : PriceType.TL });
+                //            fakeDay = fakeDay.AddDays(1);
+                //        }
+                //    }
+                //    return ResponseDto<ICollection<PriceDateGetForDateResponseDto>>.Success(response, 200);
+                //}
+
+
+                ////if (priceDates.Any(x => model.CheckIn >= x.StartDate && model.CheckIn <= x.EndDate) && priceDates.Any(x => model.CheckOut >= x.StartDate && model.CheckOut <= x.EndDate))
+                ////{
+                ////    List<PriceDateGetForDateResponseDto> response = new List<PriceDateGetForDateResponseDto>();
+
+                ////    DateTime fakeDay = model.CheckIn;
+                ////    foreach (var price in priceDates)
+                ////    {
+                ////        while (fakeDay >= price.StartDate && fakeDay <= price.EndDate)
+                ////        {
+                ////            if (fakeDay > model.CheckOut) break;
+                ////            response.Add(new() { Date = fakeDay, Price = price.Price, PriceType = price.Villa != null ? price.Villa.PriceType : PriceType.TL });
+                ////            fakeDay = fakeDay.AddDays(1);
+                ////        }
+                ////    }
+
+                ////    return ResponseDto<ICollection<PriceDateGetForDateResponseDto>>.Success(response, 200);
+
+                ////}
+                ////else
+                ////    return ResponseDto<ICollection<PriceDateGetForDateResponseDto>>.Fail(new() { new() { Title = "GetReservationPrice Errors..", Description = "Tesise Ait İlgili Tarihlerin Bir Kısmı İçin Fiyat Bulunamadı.." } }, 400);
+                #endregion
+                #region Eski
                 //var aa = priceDates.Any(x => model.CheckIn >= x.StartDate && model.CheckIn <= x.EndDate);
 
 
@@ -228,9 +275,55 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                 //    }
                 //}
 
-                //return ResponseDto<ICollection<PriceDateGetForDateResponseDto>>.Success(response, 200);
+                //return  ResponseDto<ICollection<PriceDateGetForDateResponseDto>>.Success(response, 200);
+                #endregion
+
             }
             catch (Exception ex) { return ResponseDto<ICollection<PriceDateGetForDateResponseDto>>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500); }
+        }
+
+        public async Task<bool> PriceValidationControl(PriceDateGetForDateRequestDto model)
+        {
+
+            // Todo: Kaldığım yer=> PriceCreate okey, update ve Rezervasyon kontrol edilecek
+            try
+            {
+
+                //model.CheckOut = model.CheckOut.AddDays(-1);
+
+                bool result = false;
+
+                var query = context.PriceDates
+                    .AsQueryable()
+                    .Where(x => x.GeneralStatusType == GeneralStatusType.Active);
+
+                if (model.Id != null)
+                    query = query.Where(x => x.Id != model.Id);
+
+                if (model.VillaId is not null)
+                    query = query.Where(x => x.VillaId == model.VillaId);
+                else if (model.RoomId is not null)
+                    query = query.Where(x => x.RoomId == model.RoomId);
+
+
+                //query = query.Where(x => model.CheckIn < x.EndDate && model.CheckIn > x.StartDate);
+                query = query.Where(x => (model.CheckIn < x.StartDate && model.CheckOut >= x.StartDate) || (model.CheckIn >= x.StartDate && model.CheckIn <= x.EndDate) || (model.CheckOut >= x.StartDate && model.CheckOut <= x.EndDate));
+
+
+                List<PriceDate> priceDates = await query
+                    .OrderBy(x => x.StartDate)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                result = await query.AsNoTracking().AnyAsync();
+
+
+                return result;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public async Task<ResponseDto<BaseResponseDto>> Update(PriceDateUpdateRequestDto model, Guid userId)
@@ -253,11 +346,12 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
 
                 if (model.StartDate > DateTime.MinValue || model.EndDate > DateTime.MinValue)
                 {
-                    var prices = await GetPriceForDate(new() { VillaId = getPriceDate.VillaId, RoomId = getPriceDate.RoomId, CheckIn = model.StartDate, CheckOut = model.EndDate, Id = model.Id });
-                    if (prices.Data.Count > 0)
-                    {
-                        return ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "GetPriceForDate Errors..", Description = $"Başlangıç Tarihi : {model.StartDate}, Bitiş Tarihi : {model.EndDate} olan tarihler fiyat içeriyor. Lütfen Bu tarihleri kapsayan başka bir fiyat verisi olmadığına emin olun.." } }, 400);
-                    }
+                    //var prices = await GetPriceForDate(new() { VillaId = getPriceDate.VillaId, RoomId = getPriceDate.RoomId, CheckIn = model.StartDate, CheckOut = model.EndDate, Id = model.Id });
+                    //if (prices.Errors?.Count > 0) return ResponseDto<BaseResponseDto>.Fail(prices.Errors, 400);
+
+                    bool Validation = await PriceValidationControl(new() { VillaId = getPriceDate.VillaId, RoomId = getPriceDate.RoomId, CheckIn = model.StartDate, CheckOut = model.EndDate, Id = model.Id });
+                    if (Validation)
+                        return ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Fiyat Çakışması Yaşandı..", Description = "Tesise Ait İlgili Tarihler Fiyat içeriyor. Lütfen Diğer Tarihleride Düzenleyiniz yada Fiyatları Tekrar Oluşturunuz.." } }, 400);
                 }
                 //-----
 

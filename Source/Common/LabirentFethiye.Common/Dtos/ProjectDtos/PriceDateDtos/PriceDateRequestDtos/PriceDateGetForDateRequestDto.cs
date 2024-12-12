@@ -1,4 +1,6 @@
-﻿namespace LabirentFethiye.Common.Dtos.ProjectDtos.PriceDateDtos.PriceDateRequestDtos
+﻿using LabirentFethiye.Common.Enums;
+
+namespace LabirentFethiye.Common.Dtos.ProjectDtos.PriceDateDtos.PriceDateRequestDtos
 {
     public class PriceDateGetForDateRequestDto
     {

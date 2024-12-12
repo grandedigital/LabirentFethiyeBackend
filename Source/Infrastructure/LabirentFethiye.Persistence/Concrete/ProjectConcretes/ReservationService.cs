@@ -79,7 +79,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     //-----
 
                     var prices = await GetReservationPrice(new() { VillaId = model.VillaId, RoomId = model.RoomId, CheckIn = model.CheckIn, CheckOut = model.CheckOut });
-                    if (prices.StatusCode != 200) return ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Price", Description = "Tesise Ait Fiyat Bulunamadı.." } }, 400);
+                    if (prices.StatusCode != 200) return ResponseDto<BaseResponseDto>.Fail(prices.Errors, 400);
                     //-----
 
                     // Todo: ExtraPrice,PriceType,IsCleaningPrice,IsDepositPrice işlemleri yapılacak.
@@ -1204,7 +1204,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                 // Todo: Ocak ayında fiyat var ama Şubat ayında fiyat yok. CheckIn=30 ocak => CheckOut => 4 Şubat için ocak fiyatı geliyor ama şubat fiyatı olamığı için gelmiyor. Bu durum kontrol edilecek..
                 var prices = await priceDateService.GetPriceForDate(new() { VillaId = model.VillaId, RoomId = model.RoomId, CheckIn = model.CheckIn, CheckOut = model.CheckOut });
 
-                if (prices.StatusCode != 200 || prices.Data.Count == 0)
+                if (prices.StatusCode != 200 || prices.Data?.Count == 0)
                     return ResponseDto<GetReservationPriceResponseDto>.Fail(new() { new() { Title = "GetReservationPrice Errors..", Description = "Tesise Ait Fiyat Bulunamadı.." } }, 400);
                 //-----
 

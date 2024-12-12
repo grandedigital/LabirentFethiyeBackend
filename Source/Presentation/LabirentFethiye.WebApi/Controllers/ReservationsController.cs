@@ -33,11 +33,11 @@ namespace LabirentFethiye.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] Pagination pagination, [FromQuery] GetAllReservationRequestDto model)
+        public async Task<IActionResult> GetAll([FromQuery] GetAllReservationRequestDto model)
         {
             try
             {
-                var GetAllReservation = await reservationService.GetAll(pagination, model);
+                var GetAllReservation = await reservationService.GetAll( model);
                 return StatusCode(GetAllReservation.StatusCode, GetAllReservation);
             }
             catch (Exception ex)

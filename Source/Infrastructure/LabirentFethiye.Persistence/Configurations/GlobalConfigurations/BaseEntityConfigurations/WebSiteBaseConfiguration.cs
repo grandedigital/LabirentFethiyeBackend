@@ -17,10 +17,10 @@ namespace LabirentFethiye.Persistence.Configurations.GlobalConfigurations.BaseCo
 
             if (builder.Property(x => x.Id) == null) builder.Property(x => x.Id).HasDefaultValue(Guid.NewGuid());
 
-            builder.Property(p => p.CreatedById).IsRequired().HasDefaultValueSql("0x0").HasColumnOrder(ColumnOrder);
+            builder.Property(p => p.CreatedById).HasColumnOrder(ColumnOrder);
             builder.Property(p => p.CreatedAt).IsRequired().HasDefaultValueSql("GETDATE()").HasColumnOrder(ColumnOrder);
-            builder.Property(p => p.UpdatedById).IsRequired().HasDefaultValueSql("0x0").HasColumnOrder(ColumnOrder);
-            builder.Property(p => p.UpdatedAt).IsRequired().HasColumnOrder(ColumnOrder);
+            builder.Property(p => p.UpdatedById).HasColumnOrder(ColumnOrder);
+            builder.Property(p => p.UpdatedAt).HasColumnOrder(ColumnOrder);
             builder.Property(p => p.GeneralStatusType).IsRequired().HasDefaultValue(GeneralStatusType.Active).HasColumnOrder(ColumnOrder);
 
             builder.Property(p => p.MetaDescription).IsRequired().HasMaxLength(250).HasColumnOrder(ColumnOrder);

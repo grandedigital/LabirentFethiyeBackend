@@ -1,5 +1,6 @@
 ﻿using LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientRequestDtos;
 using LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientResponseDtos;
+using LabirentFethiye.Common.Requests;
 using LabirentFethiye.Common.Responses;
 
 namespace LabirentFethiye.Application.Abstracts.ProjectInterfaces
@@ -20,8 +21,9 @@ namespace LabirentFethiye.Application.Abstracts.ProjectInterfaces
         Task<ResponseDto<ICollection<ClientPriceTableGetAllByVillaSlugResponseDto>>> GetAllPriceTableByVillaSlug(ClientPriceTableGetAllByVillaSlugRequestDto model);
         Task<ResponseDto<ICollection<ClientReservationCalendarGetByVillaSlugResponseDto>>> GetReservationCalendarByVillaSlug(ClientReservationCalendarGetByVillaSlugRequestDto model);
         Task<ResponseDto<ICollection<ClientCommentGetAllByVillaSlugResponseDto>>> GetAllCommentByVillaSlug(ClientCommentGetAllByVillaSlugRequestDto model);
-        Task<ResponseDto<ICollection<ClientRecommendedVillaGetAllByVillaSlugResponseDto>>> GetAllRecommendedVillaByVillaSlug(ClientRecommendedVillaGetAllByVillaSlugRequestDto model);
+        Task<ResponseDto<ICollection<ClientRecommendedVillaGetAllByVillaSlugResponseDto>>> GetAllRecommendedVilla(ClientRecommendedVillaGetAllByVillaSlugRequestDto model);
         Task<ResponseDto<BaseResponseDto>> CreateComment(ClientCommentCreateRequestDto model);
+        Task<ResponseDto<ICollection<ClientVillaSaleGetAllResponseDto>>> GetAllVillaSale(ClientVillaSaleGetAllRequestDto model);
 
         #endregion
 
@@ -51,6 +53,7 @@ namespace LabirentFethiye.Application.Abstracts.ProjectInterfaces
         #endregion
 
         Task<ResponseDto<ClientCurrencyGetResponseDto>> GetCurrency();
+        Task<ResponseDto<ICollection<ClientDistrictGetAllResponseDto>>> GetAllDistrict();
 
 
     }

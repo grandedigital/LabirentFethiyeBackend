@@ -2,9 +2,9 @@
 
 namespace LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientRequestDtos
 {
-    public class ClientGetAllWebPageRequestDto
+    public class ClientVillaSaleGetAllRequestDto
     {
-        public ClientGetAllWebPageRequestDto()
+        public ClientVillaSaleGetAllRequestDto()
         {
             Pagination = new Pagination()
             {
@@ -12,8 +12,7 @@ namespace LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientRequestDtos
                 Page = 0
             };
         }
-        public Pagination Pagination { get; set; }
+        public Pagination? Pagination { get; set; }
         public string Language { get; set; }
-        public string MenuId { get; set; }
     }
 }

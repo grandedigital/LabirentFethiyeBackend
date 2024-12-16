@@ -1,7 +1,9 @@
 ﻿using LabirentFethiye.Application.Abstracts.ProjectInterfaces;
 using LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientRequestDtos;
+using LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientResponseDtos;
 using LabirentFethiye.Common.Requests;
 using LabirentFethiye.Common.Responses;
+using LabirentFethiye.Persistence.Concrete.ProjectConcretes;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -52,18 +54,6 @@ namespace LabirentFethiye.WebApi.Controllers
             {
                 var villas = await clientService.GetAllVilla(model);
                 return StatusCode(villas.StatusCode, villas);
-            }
-            catch (Exception ex)
-            { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500)); }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetVilla([FromQuery] ClientVillaGetRequestDto model)
-        {
-            try
-            {
-                var villa = await clientService.GetVilla(model);
-                return StatusCode(villa.StatusCode, villa);
             }
             catch (Exception ex)
             { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500)); }
@@ -130,22 +120,33 @@ namespace LabirentFethiye.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllRecommendedVillaByVillaSlug([FromQuery] ClientRecommendedVillaGetAllByVillaSlugRequestDto model)
+        public async Task<IActionResult> GetAllRecommendedVilla([FromQuery] ClientRecommendedVillaGetAllByVillaSlugRequestDto model)
         {
             try
             {
-                var villas = await clientService.GetAllRecommendedVillaByVillaSlug(model);
+                var villas = await clientService.GetAllRecommendedVilla(model);
                 return StatusCode(villas.StatusCode, villas);
             }
             catch (Exception ex)
             { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500)); }
         }
-
+        
+        [HttpGet]
+        public async Task<IActionResult> GetAllVillaSale([FromQuery] ClientVillaSaleGetAllRequestDto model)
+        {
+            try
+            {
+                var villas = await clientService.GetAllVillaSale(model);
+                return StatusCode(villas.StatusCode, villas);
+            }
+            catch (Exception ex)
+            { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500)); }
+        }
         #endregion
 
         #region Comment
         [HttpPost]
-        public async Task<IActionResult> CreateComment([FromQuery] ClientCommentCreateRequestDto model)
+        public async Task<IActionResult> CreateComment([FromForm] ClientCommentCreateRequestDto model)
         {
             try
             {
@@ -155,6 +156,22 @@ namespace LabirentFethiye.WebApi.Controllers
             catch (Exception ex)
             { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500)); }
         }
+        #endregion
+
+        #region Town
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllDistrict()
+        {
+            try
+            {
+                var districts = await clientService.GetAllDistrict();
+                return StatusCode(districts.StatusCode, districts);
+            }
+            catch (Exception ex)
+            { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500)); }
+        }
+
         #endregion
 
         #region Hotel Room
@@ -231,7 +248,7 @@ namespace LabirentFethiye.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllCommentByHotelSlug([FromQuery] ClientCommentGetAllByHotelSlugRequestDto model)
+        public async Task<IActionResult> GetAllCommentByRoomSlug([FromQuery] ClientCommentGetAllByHotelSlugRequestDto model)
         {
             try
             {
@@ -321,140 +338,6 @@ namespace LabirentFethiye.WebApi.Controllers
             catch (Exception ex)
             { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500)); }
         }
-
-
-        ///------------------------
-
-        #region Villa
-
-
-        [HttpGet]
-        public async Task<IActionResult> GetVilla([FromQuery] string Slug, string Language)
-        {
-            //try
-            //{
-            //    var villa = await _clientService.GetVilla(Slug, Language);
-            //    return StatusCode(villa.StatusCode, villa);
-            //}
-            //catch (Exception ex) { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<ClientVillaGetResponseDto>.Fail(ex.Message.ToString(), 500)); }
-            return Ok();
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAllVilla([FromQuery] Pagination pagination, string Language)
-        {
-            //try
-            //{
-            //    var villas = await _clientService.GetAllVilla(pagination, Language, CompanyId);
-            //    return StatusCode(villas.StatusCode, villas);
-            //}
-            //catch (Exception ex) { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<ClientVillaGetResponseDto>.Fail(ex.Message.ToString(), 500)); }
-            return Ok();
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAllVillaBySlug([FromQuery] Pagination pagination, string Language, string Slug)
-        {
-            //try
-            //{
-            //    var villas = await _clientService.GetAllVillaByCategoryId(pagination, Language, CompanyId, CategoryId);
-            //    return StatusCode(villas.StatusCode, villas);
-            //}
-            //catch (Exception ex) { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<ClientVillaGetResponseDto>.Fail(ex.Message.ToString(), 500)); }
-            return Ok();
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAllVillaSearch() //[FromQuery] GetAllVillaSearchRequestDto model
-        {
-            //try
-            //{
-            //    var villas = await _clientService.GetAllVillaSearch(model);
-            //    return StatusCode(villas.StatusCode, villas);
-            //}
-            //catch (Exception ex) { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<ClientVillaGetResponseDto>.Fail(ex.Message.ToString(), 500)); }
-            return Ok();
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAllVillaSale([FromQuery] Pagination pagination, string Language, string CompanyId)
-        {
-            //try
-            //{
-            //    var villas = await _clientService.GetAllVillaSale(pagination, Language, CompanyId);
-            //    return StatusCode(villas.StatusCode, villas);
-            //}
-            //catch (Exception ex) { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<ClientVillaGetResponseDto>.Fail(ex.Message.ToString(), 500)); }
-            return Ok();
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAllVillaByRecomended() //[FromQuery] GetAllVillaNearbyRequestDto model
-        {
-            //try
-            //{
-            //    var villas = await _clientService.GetAllVillaNearby(model);
-            //    return StatusCode(villas.StatusCode, villas);
-            //}
-            //catch (Exception ex) { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<GetAllVillaNearbyRequestDto>.Fail(ex.Message.ToString(), 500)); }
-            return Ok();
-        }
-        #endregion
-
-        #region Hotel
-        [HttpGet]
-        public async Task<IActionResult> GetAllHotel([FromQuery] Pagination pagination, string Language, string CompanyId)
-        {
-            //try
-            //{
-            //    var villas = await _clientService.GetAllHotel(pagination, Language, CompanyId);
-            //    return StatusCode(villas.StatusCode, villas);
-            //}
-            //catch (Exception ex) { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<ClientHotelGetResponseDto>.Fail(ex.Message.ToString(), 500)); }
-            return Ok();
-        }
-        [HttpGet]
-        public async Task<IActionResult> GetHotel([FromQuery] string Slug, string Language)
-        {
-            //try
-            //{
-            //    var villa = await _clientService.GetHotel(Slug, Language);
-            //    return StatusCode(villa.StatusCode, villa);
-            //}
-            //catch (Exception ex) { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<ClientHotelGetResponseDto>.Fail(ex.Message.ToString(), 500)); }
-            return Ok();
-        }
-        [HttpGet]
-        public async Task<IActionResult> GetRoom([FromQuery] string Slug, string Language)
-        {
-            //try
-            //{
-            //    var villa = await _clientService.GetRoom(Slug, Language);
-            //    return StatusCode(villa.StatusCode, villa);
-            //}
-            //catch (Exception ex) { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<ClientRoomGetResponseDto>.Fail(ex.Message.ToString(), 500)); }
-            return Ok();
-        }
-        #endregion
-
-        #region Comment
-        [HttpPost]
-        public async Task<IActionResult> CreateComment() //[FromForm] CreateCommentRequestDto model
-        {
-            //try
-            //{
-            //    var villas = await _clientService.CreateComment(model);
-            //    return StatusCode(villas.StatusCode, villas);
-            //}
-            //catch (Exception ex) { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<GetAllVillaNearbyRequestDto>.Fail(ex.Message.ToString(), 500)); }
-            return Ok();
-        }
-        #endregion
-
-        #region WebPages
-        // Bölgeler
-        // Bloglar
-        // Footer
-        #endregion
     }
+
 }

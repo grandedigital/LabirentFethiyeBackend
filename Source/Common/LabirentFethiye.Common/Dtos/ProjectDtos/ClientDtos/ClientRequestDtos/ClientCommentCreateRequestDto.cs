@@ -11,7 +11,7 @@
         public string? Email { get; set; }
         public string? Phone { get; set; }
 
-        public Guid? VillaId { get; set; }
-        public Guid? HotelId { get; set; }
+        public string? VillaSlug { get; set; }
+        public string? HotelSlug { get; set; }
     }
 }

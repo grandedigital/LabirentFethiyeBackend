@@ -32,11 +32,10 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             {
                 ICollection<ClientCategoryGetAllResponseDto> getCategories = await context.Categories
                     .Where(x => x.GeneralStatusType == GeneralStatusType.Active)
-                    .Include(x => x.CategoryDetails.Where(x => x.LanguageCode == model.Language))
                     .Select(category => new ClientCategoryGetAllResponseDto()
                     {
                         Icon = category.Icon,
-                        Name = category.CategoryDetails.FirstOrDefault().Name,
+                        Name = category.CategoryDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Name,
                         Slug = category.Slug
                     })
                     .AsNoTracking()
@@ -63,14 +62,14 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
 
                 query = query.OrderByDescending(x => x.Line);
 
-                query = query.Include(x => x.VillaDetails.Where(x => x.LanguageCode == model.Language));
+                query = query.Include(x => x.VillaDetails);
 
                 PageInfo pageInfo = GeneralFunctions.PageInfoHelper(Page: model.Pagination.Page, Size: model.Pagination.Size, TotalCount: await query.CountAsync());
 
                 ICollection<ClientVillaGetAllByCategorySlugResponseDto> getVillas = await query
                     .Select(villa => new ClientVillaGetAllByCategorySlugResponseDto()
                     {
-                        Name = villa.VillaDetails.FirstOrDefault().Name,
+                        Name = villa.VillaDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Name,
                         Bath = villa.Bath,
                         Room = villa.Room,
                         Person = villa.Person,
@@ -80,9 +79,9 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         PriceType = villa.PriceType,
                         CategoryMetaTitle = villa.VillaCategories.FirstOrDefault().Category.MetaTitle,
                         CategoryMetaDescription = villa.VillaCategories.FirstOrDefault().Category.MetaDescription,
-                        FeatureTextWhite = villa.VillaDetails.FirstOrDefault().FeatureTextWhite,
-                        MinPrice = villa.PriceTables.Min(x => x.Price),
-                        MaxPrice = villa.PriceTables.Max(x => x.Price),
+                        FeatureTextWhite = villa.VillaDetails.FirstOrDefault(x => x.LanguageCode == model.Language).FeatureTextWhite,
+                        MinPrice = villa.PriceTables.Count > 0 ? villa.PriceTables.Min(x => x.Price) : 0,
+                        MaxPrice = villa.PriceTables.Count > 0 ? villa.PriceTables.Max(x => x.Price) : 0,
                         Town = villa.Town.Name,
                         District = villa.Town.District.Name,
                         Photos = villa.Photos.OrderBy(x => x.Line).Take(3).Select(villaPhoto => new ClientVillaGetAllByCategorySlugResponseDtoPhotos()
@@ -109,10 +108,10 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             {
                 var villa = await context.Villas
                     .Where(x => x.GeneralStatusType == GeneralStatusType.Active && x.Slug == model.Slug)
-                    .Include(x => x.VillaDetails.Where(x => x.LanguageCode == model.Language))
+                    .Include(x => x.VillaDetails)
                     .Select(villa => new ClientVillaGetBySlugResponseDto()
                     {
-                        Name = villa.VillaDetails.FirstOrDefault().Name,
+                        Name = villa.VillaDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Name,
                         Room = villa.Room,
                         Person = villa.Person,
                         Bath = villa.Bath,
@@ -120,9 +119,9 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         PriceType = villa.PriceType,
                         MetaTitle = villa.MetaTitle,
                         MetaDescription = villa.MetaDescription,
-                        DescriptionLong = villa.VillaDetails.FirstOrDefault().DescriptionLong,
-                        MinPrice = villa.PriceTables.Min(x => x.Price),
-                        MaxPrice = villa.PriceTables.Max(x => x.Price),
+                        DescriptionLong = villa.VillaDetails.FirstOrDefault(x => x.LanguageCode == model.Language).DescriptionLong,
+                        MinPrice = villa.PriceTables.Count > 0 ? villa.PriceTables.Min(x => x.Price) : 0,
+                        MaxPrice = villa.PriceTables.Count > 0 ? villa.PriceTables.Max(x => x.Price) : 0,
                         Town = villa.Town.Name,
                         District = villa.Town.District.Name,
                         Photos = villa.Photos.OrderBy(x => x.Line).Select(villaPhoto => new ClientVillaGetBySlugResponseDtoPhotos()
@@ -153,7 +152,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             {
                 var query = context.DistanceRulers
                     .Where(x => x.GeneralStatusType == GeneralStatusType.Active && x.Villa.Slug == model.Slug)
-                    .Include(x => x.DistanceRulerDetails.Where(x => x.LanguageCode == model.Language))
+                    .Include(x => x.DistanceRulerDetails)
                     .OrderByDescending(x => x.Line);
 
 
@@ -162,7 +161,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     {
                         Icon = distanceRuler.Icon,
                         Value = distanceRuler.Value,
-                        Name = distanceRuler.DistanceRulerDetails.FirstOrDefault().Name
+                        Name = distanceRuler.DistanceRulerDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Name
                     })
                     .AsNoTracking()
                     .ToListAsync();
@@ -187,12 +186,14 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
 
                 PageInfo pageInfo = GeneralFunctions.PageInfoHelper(Page: model.Pagination.Page, Size: model.Pagination.Size, TotalCount: await query.CountAsync());
 
-                query = query.Include(x => x.VillaDetails.Where(x => x.LanguageCode == model.Language));
+                query = query
+                    .Include(x => x.VillaDetails)
+                    .Include(x => x.PriceTables);
 
                 ICollection<ClientVillaGetAllResponseDto> getVillas = await query
                     .Select(villa => new ClientVillaGetAllResponseDto()
                     {
-                        Name = villa.VillaDetails.FirstOrDefault().Name,
+                        Name = villa.VillaDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Name,
                         Bath = villa.Bath,
                         Room = villa.Room,
                         Person = villa.Person,
@@ -203,8 +204,8 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         CategoryMetaTitle = "Fethiye Kiralık Villalar | Lüks ve Konforlu Tatil Seçenekleri",
                         CategoryMetaDescription = "Fethiye'de lüks ve konforlu haftalık kiralık villalar! Eşsiz doğa manzaraları, özel havuzlar ve modern olanaklarla dolu villalarımızda unutulmaz bir tatil deneyimi yaşayın. Hemen rezervasyon yapın ve Fethiye'nin güzelliklerini keşfedin!",
                         FeatureTextWhite = villa.VillaDetails.FirstOrDefault().FeatureTextWhite,
-                        MinPrice = villa.PriceTables.Min(x => x.Price),
-                        MaxPrice = villa.PriceTables.Max(x => x.Price),
+                        MinPrice = villa.PriceTables.Count > 0 ? villa.PriceTables.Min(x => x.Price) : 0,
+                        MaxPrice = villa.PriceTables.Count > 0 ? villa.PriceTables.Max(x => x.Price) : 0,
                         Town = villa.Town.Name,
                         District = villa.Town.District.Name,
                         Photos = villa.Photos.OrderBy(x => x.Line).Take(3).Select(villaPhoto => new ClientVillaGetAllResponseDtoPhotos()
@@ -232,23 +233,23 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                 var getVilla = await context.Villas
                     .Where(x => x.GeneralStatusType == GeneralStatusType.Active)
                     .OrderByDescending(x => x.Line)
-                    .Include(x => x.VillaDetails.Where(x => x.LanguageCode == model.Language))
+                    .Include(x => x.VillaDetails)
                     .Select(villa => new ClientVillaGetResponseDto()
                     {
-                        Name = villa.VillaDetails.FirstOrDefault().Name,
+                        Name = villa.VillaDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Name,
                         Bath = villa.Bath,
                         Room = villa.Room,
                         Person = villa.Person,
                         OnlineReservation = villa.OnlineReservation,
                         Slug = villa.Slug,
-                        DescriptionLong = villa.VillaDetails.FirstOrDefault().DescriptionLong,
+                        DescriptionLong = villa.VillaDetails.FirstOrDefault(x => x.LanguageCode == model.Language).DescriptionLong,
                         VillaNumber = villa.VillaNumber,
                         PriceType = villa.PriceType,
                         CategoryMetaTitle = "Fethiye Kiralık Villalar | Lüks ve Konforlu Tatil Seçenekleri",
                         CategoryMetaDescription = "Fethiye'de lüks ve konforlu haftalık kiralık villalar! Eşsiz doğa manzaraları, özel havuzlar ve modern olanaklarla dolu villalarımızda unutulmaz bir tatil deneyimi yaşayın. Hemen rezervasyon yapın ve Fethiye'nin güzelliklerini keşfedin!",
-                        FeatureTextWhite = villa.VillaDetails.FirstOrDefault().FeatureTextWhite,
-                        MinPrice = villa.PriceTables.Min(x => x.Price),
-                        MaxPrice = villa.PriceTables.Max(x => x.Price),
+                        FeatureTextWhite = villa.VillaDetails.FirstOrDefault(x => x.LanguageCode == model.Language).FeatureTextWhite,
+                        MinPrice = villa.PriceTables.Count > 0 ? villa.PriceTables.Min(x => x.Price) : 0,
+                        MaxPrice = villa.PriceTables.Count > 0 ? villa.PriceTables.Max(x => x.Price) : 0,
                         Town = villa.Town.Name,
                         District = villa.Town.District.Name,
                         Photos = villa.Photos.OrderBy(x => x.Line).Select(villaPhoto => new ClientVillaGetResponseDtoPhotos()
@@ -273,7 +274,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             {
                 var query = context.PriceTables
                     .Where(x => x.GeneralStatusType == GeneralStatusType.Active && x.Villa.Slug == model.Slug)
-                    .Include(x => x.PriceTableDetails.Where(x => x.LanguageCode == model.Language))
+                    .Include(x => x.PriceTableDetails)
                     .OrderByDescending(x => x.Line);
 
 
@@ -281,8 +282,8 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     .Select(priceTable => new ClientPriceTableGetAllByVillaSlugResponseDto()
                     {
                         Icon = priceTable.Icon,
-                        Title = priceTable.PriceTableDetails.FirstOrDefault().Title,
-                        Description = priceTable.PriceTableDetails.FirstOrDefault().Description,
+                        Title = priceTable.PriceTableDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Title,
+                        Description = priceTable.PriceTableDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Description,
                         Price = priceTable.Price
                     })
                     .AsNoTracking()
@@ -352,7 +353,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             }
         }
 
-        public async Task<ResponseDto<ICollection<ClientRecommendedVillaGetAllByVillaSlugResponseDto>>> GetAllRecommendedVillaByVillaSlug(ClientRecommendedVillaGetAllByVillaSlugRequestDto model)
+        public async Task<ResponseDto<ICollection<ClientRecommendedVillaGetAllByVillaSlugResponseDto>>> GetAllRecommendedVilla(ClientRecommendedVillaGetAllByVillaSlugRequestDto model)
         {
             try
             {
@@ -361,7 +362,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     .OrderByDescending(x => x.Line)
                     .Select(villa => new ClientRecommendedVillaGetAllByVillaSlugResponseDto()
                     {
-                        Name = villa.VillaDetails.FirstOrDefault().Name,
+                        Name = villa.VillaDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Name,
                         Bath = villa.Bath,
                         Room = villa.Room,
                         Person = villa.Person,
@@ -369,9 +370,9 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         Slug = villa.Slug,
                         VillaNumber = villa.VillaNumber,
                         PriceType = villa.PriceType,
-                        FeatureTextWhite = villa.VillaDetails.FirstOrDefault().FeatureTextWhite,
-                        MinPrice = villa.PriceTables.Min(x => x.Price),
-                        MaxPrice = villa.PriceTables.Max(x => x.Price),
+                        FeatureTextWhite = villa.VillaDetails.FirstOrDefault(x => x.LanguageCode == model.Language).FeatureTextWhite,
+                        MinPrice = villa.PriceTables.Count > 0 ? villa.PriceTables.Min(x => x.Price) : 0,
+                        MaxPrice = villa.PriceTables.Count > 0 ? villa.PriceTables.Max(x => x.Price) : 0,
                         Town = villa.Town.Name,
                         District = villa.Town.District.Name,
                         Photos = villa.Photos.Take(3).Select(villaPhoto => new ClientRecommendedVillaGetAllByVillaSlugResponseDtoPhotos()
@@ -400,8 +401,8 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                 {
                     GeneralStatusType = GeneralStatusType.Passive,
                     CreatedAt = DateTime.Now,
-                    VillaId = model.VillaId == Guid.Empty ? null : model.VillaId,
-                    HotelId = model.HotelId == Guid.Empty ? null : model.HotelId,
+                    VillaId = model.VillaSlug is not null ? context.Villas.SingleOrDefaultAsync(x => x.Slug == model.VillaSlug).Result.Id : null,
+                    HotelId = model.HotelSlug is not null ? context.Hotels.SingleOrDefaultAsync(x => x.Slug == model.HotelSlug).Result.Id : null,
                     Title = model.Title,
                     CommentText = model.CommentText,
                     Rating = model.Rating,
@@ -423,6 +424,41 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             }
         }
 
+        public async Task<ResponseDto<ICollection<ClientVillaSaleGetAllResponseDto>>> GetAllVillaSale(ClientVillaSaleGetAllRequestDto model)
+        {
+            try
+            {
+                ICollection<ClientVillaSaleGetAllResponseDto> getVillas = await context.Villas
+                    .Where(x => x.GeneralStatusType == GeneralStatusType.Active && x.IsSale == true)
+                    .OrderByDescending(x => x.Line)
+                    .Select(villa => new ClientVillaSaleGetAllResponseDto()
+                    {
+                        Name = villa.VillaDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Name,
+                        Bath = villa.Bath,
+                        Room = villa.Room,
+                        Person = villa.Person,
+                        Slug = villa.Slug,
+                        VillaNumber = villa.VillaNumber,
+                        FeatureTextWhite = villa.VillaDetails.FirstOrDefault(x => x.LanguageCode == model.Language).FeatureTextWhite,
+                        Town = villa.Town.Name,
+                        District = villa.Town.District.Name,
+                        Photos = villa.Photos.Take(3).Select(villaPhoto => new ClientVillaSaleGetAllResponseDtoPhotos()
+                        {
+                            Image = villaPhoto.Image,
+                        }).ToList()
+                    })
+                    .Skip(0)
+                    .Take(5)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                return ResponseDto<ICollection<ClientVillaSaleGetAllResponseDto>>.Success(getVillas, 200);
+            }
+            catch (Exception ex)
+            {
+                return ResponseDto<ICollection<ClientVillaSaleGetAllResponseDto>>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500);
+            }
+        }
 
         #endregion
 
@@ -435,16 +471,16 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                 var getHotel = await context.Hotels
                     .Where(x => x.Slug == model.Slug && x.GeneralStatusType == GeneralStatusType.Active)
                     .OrderByDescending(x => x.Line)
-                    .Include(x => x.HotelDetails.Where(x => x.LanguageCode == model.Language))
+                    .Include(x => x.HotelDetails)
                     .Select(hotel => new ClientHotelGetResponseDto()
                     {
-                        Name = hotel.HotelDetails.FirstOrDefault().Name,
+                        Name = hotel.HotelDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Name,
                         Bath = hotel.Bath,
                         Room = hotel.Room,
                         Person = hotel.Person,
                         Slug = hotel.Slug,
                         PriceType = hotel.PriceType,
-                        DescriptionLong = hotel.HotelDetails.FirstOrDefault().DescriptionLong,
+                        DescriptionLong = hotel.HotelDetails.FirstOrDefault(x => x.LanguageCode == model.Language).DescriptionLong,
                         MetaTitle = hotel.MetaTitle,
                         MetaDescription = hotel.MetaDescription,
                         MinPrice = hotel.Rooms.SelectMany(room => room.PriceTables).Min(x => x.Price),
@@ -457,11 +493,11 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         }).ToList(),
                         Rooms = hotel.Rooms.Select(room => new ClientHotelGetResponseDtoRoom()
                         {
-                            Name = room.RoomDetails.FirstOrDefault().Name,
+                            Name = room.RoomDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Name,
                             Bath = room.Bath,
                             Rooms = room.Rooms,
                             Person = room.Person,
-                            FeatureTextWhite = room.RoomDetails.FirstOrDefault().FeatureTextWhite,
+                            FeatureTextWhite = room.RoomDetails.FirstOrDefault(x => x.LanguageCode == model.Language).FeatureTextWhite,
                             OnlineReservation = room.OnlineReservation,
                             //PriceType=room.PriceType,
                             PriceType = hotel.PriceType,
@@ -490,10 +526,10 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                 var getRoom = await context.Rooms
                     .Where(x => x.Slug == model.Slug && x.Hotel.GeneralStatusType == GeneralStatusType.Active && x.GeneralStatusType == GeneralStatusType.Active)
                     .OrderByDescending(x => x.Line)
-                    .Include(x => x.RoomDetails.Where(x => x.LanguageCode == model.Language))
+                    .Include(x => x.RoomDetails)
                     .Select(room => new ClientRoomGetResponseDto()
                     {
-                        Name = room.RoomDetails.FirstOrDefault().Name,
+                        Name = room.RoomDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Name,
                         Bath = room.Bath,
                         Rooms = room.Rooms,
                         Person = room.Person,
@@ -526,16 +562,16 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                 ICollection<ClientHotelGetAllResponseDto> getHotels = await context.Hotels
                     .Where(x => x.GeneralStatusType == GeneralStatusType.Active)
                     .OrderByDescending(x => x.Line)
-                    .Include(x => x.HotelDetails.Where(x => x.LanguageCode == model.Language))
+                    .Include(x => x.HotelDetails)
                     .Select(hotel => new ClientHotelGetAllResponseDto()
                     {
-                        Name = hotel.HotelDetails.FirstOrDefault().ToString(),
+                        Name = hotel.HotelDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Name,
                         Bath = hotel.Bath,
                         Room = hotel.Room,
                         Person = hotel.Person,
                         Slug = hotel.Slug,
                         PriceType = hotel.PriceType,
-                        FeatureTextWhite = hotel.HotelDetails.FirstOrDefault().FeatureTextWhite,
+                        FeatureTextWhite = hotel.HotelDetails.FirstOrDefault(x => x.LanguageCode == model.Language).FeatureTextWhite,
                         MinPrice = hotel.Rooms.SelectMany(room => room.PriceTables).Min(x => x.Price),
                         MaxPrice = hotel.Rooms.SelectMany(room => room.PriceTables).Max(x => x.Price),
                         Town = hotel.Town.Name,
@@ -564,7 +600,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             {
                 var query = context.DistanceRulers
                     .Where(x => x.GeneralStatusType == GeneralStatusType.Active && x.Hotel.Slug == model.Slug)
-                    .Include(x => x.DistanceRulerDetails.Where(x => x.LanguageCode == model.Language))
+                    .Include(x => x.DistanceRulerDetails)
                     .OrderByDescending(x => x.Line);
 
 
@@ -573,7 +609,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     {
                         Icon = distanceRuler.Icon,
                         Value = distanceRuler.Value,
-                        Name = distanceRuler.DistanceRulerDetails.FirstOrDefault().Name
+                        Name = distanceRuler.DistanceRulerDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Name
                     })
                     .AsNoTracking()
                     .ToListAsync();
@@ -592,15 +628,15 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             {
                 var query = context.PriceTables
                     .Where(x => x.GeneralStatusType == GeneralStatusType.Active && x.Room.Slug == model.Slug)
-                    .Include(x => x.PriceTableDetails.Where(x => x.LanguageCode == model.Language))
+                    .Include(x => x.PriceTableDetails)
                     .OrderByDescending(x => x.Line);
 
                 ICollection<ClientPriceTableGetAllByRoomSlugResponseDto> getPriceTables = await query
                     .Select(priceTable => new ClientPriceTableGetAllByRoomSlugResponseDto()
                     {
                         Icon = priceTable.Icon,
-                        Title = priceTable.PriceTableDetails.FirstOrDefault().Title,
-                        Description = priceTable.PriceTableDetails.FirstOrDefault().Description,
+                        Title = priceTable.PriceTableDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Title,
+                        Description = priceTable.PriceTableDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Description,
                         Price = priceTable.Price
                     })
                     .AsNoTracking()
@@ -887,6 +923,35 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             }
         }
 
+        #endregion
+
+        #region Town
+
+        public async Task<ResponseDto<ICollection<ClientDistrictGetAllResponseDto>>> GetAllDistrict()
+        {
+            try
+            {
+                var getAllTown = await context.Districts
+                    .AsNoTracking()
+                    .Where(x => x.Towns.Count > 0)
+                    .Select(d => new ClientDistrictGetAllResponseDto
+                    {
+                        Id = d.Id,
+                        Name = d.Name,
+                        Towns = d.Towns.Select(t => new ClientDistrictGetAllResponseDtoTown
+                        {
+                            Name = t.Name
+                        }).ToList()
+                    })
+                    .ToListAsync();
+
+                return ResponseDto<ICollection<ClientDistrictGetAllResponseDto>>.Success(getAllTown, 200);
+            }
+            catch (Exception ex)
+            {
+                return ResponseDto<ICollection<ClientDistrictGetAllResponseDto>>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500);
+            }
+        }
         #endregion
 
         #region WebPages

@@ -34,6 +34,18 @@ namespace LabirentFethiye.WebApi.Controllers
         #endregion
 
         #region Villa
+        
+        [HttpGet]
+        public async Task<IActionResult> GetAllVillaSearch([FromQuery] ClientVillaSearchGetAllRequestDto model)
+        {
+            try
+            {
+                var villas = await clientService.GetAllVillaSearch(model);
+                return StatusCode(villas.StatusCode, villas);
+            }
+            catch (Exception ex)
+            { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500)); }
+        }
 
         [HttpGet]
         public async Task<IActionResult> GetAllVillaByCategorySlug([FromQuery] ClientVillaGetAllByCategorySlugRequestDto model)

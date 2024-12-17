@@ -1,8 +1,12 @@
 ﻿using LabirentFethiye.Application.Abstracts.ProjectInterfaces;
+using LabirentFethiye.Common.Dtos.GlobalDtos.DistrictDtos.DistrictResponseDtos;
 using LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientRequestDtos;
 using LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientResponseDtos;
+using LabirentFethiye.Common.Dtos.ProjectDtos.ReservationDtos.ReservationResponseDtos;
+using LabirentFethiye.Common.Dtos.TownDtos.TownResponseDtos;
 using LabirentFethiye.Common.Enums;
 using LabirentFethiye.Common.Responses;
+using LabirentFethiye.Domain.Entities.GlobalEntities;
 using LabirentFethiye.Domain.Entities.ProjectEntities;
 using LabirentFethiye.Persistence.Contexts;
 using LabirentFethiye.Persistence.Helpers;
@@ -51,6 +55,137 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
         #endregion
 
         #region Villa
+
+        public async Task<ResponseDto<ICollection<ClientVillaSearchGetAllResponseDto>>> GetAllVillaSearch(ClientVillaSearchGetAllRequestDto model)
+        {
+            try
+            {
+                var query = context.Villas
+                    .AsQueryable()
+                    .Where(x => x.GeneralStatusType == GeneralStatusType.Active);
+                //------
+                if ((model.Person != null && model.Person > 0) && (model.Name != null && !String.IsNullOrEmpty(model.Name)) && (model.CheckIn != null && model.CheckIn >= DateTime.Now.Date) && (model.CheckOut != null && model.CheckOut > DateTime.Now.Date && model.CheckOut > model.CheckIn))
+                {
+                    // Hepsi => Villa veya apart adı, Giriş Çıkış Tarihleri, Kapasite
+                    List<string> notAvailibleVillaIds = await context.Reservations
+                       .AsNoTracking()
+                       .Where(x =>
+                           x.GeneralStatusType == GeneralStatusType.Active
+                           && model.CheckIn < x.CheckOut
+                           && model.CheckOut > x.CheckIn
+                       )
+                       .Select(item => item.VillaId.ToString())
+                       .ToListAsync();
+
+                    query = query.Where(x => x.Person >= model.Person && x.VillaDetails.Any(vd => vd.Name.Contains(model.Name)) && !notAvailibleVillaIds.Contains(x.Id.ToString()));
+                }
+                else if ((model.Person != null && model.Person > 0) && (model.CheckIn != null && model.CheckIn >= DateTime.Now.Date) && (model.CheckOut != null && model.CheckOut > DateTime.Now.Date))
+                {
+                    // Sadece Giriş Çıkış Tarihleri, Kapasite
+                    List<string> notAvailibleVillaIds = await context.Reservations
+                       .AsNoTracking()
+                       .Where(x =>
+                           x.GeneralStatusType == GeneralStatusType.Active
+                           && model.CheckIn < x.CheckOut
+                           && model.CheckOut > x.CheckIn
+                       )
+                       .Select(item => item.VillaId.ToString())
+                       .ToListAsync();
+
+                    query = query.Where(x => x.Person >= model.Person && !notAvailibleVillaIds.Contains(x.Id.ToString()));
+                }
+                else if ((model.Person != null && model.Person > 0) && (model.Name != null && !String.IsNullOrEmpty(model.Name)))
+                {
+                    // Sadece villa yada apart adi, Kapasite
+                    query = query.Where(x => x.Person >= model.Person && x.VillaDetails.Any(vd => vd.Name.Contains(model.Name)));
+                }
+                else if ((model.Name != null && !String.IsNullOrEmpty(model.Name)) && (model.CheckIn != null && model.CheckIn > DateTime.Now.Date) && (model.CheckOut != null && model.CheckOut > DateTime.Now.Date) && (model.Person == null || model.Person == 0))
+                {
+                    // Sadece villa veya apart adı, Giriş Çıkış Tarihleri
+                    List<string> notAvailibleVillaIds = await context.Reservations
+                       .AsNoTracking()
+                       .Where(x =>
+                           x.GeneralStatusType == GeneralStatusType.Active
+                           && model.CheckIn < x.CheckOut
+                           && model.CheckOut > x.CheckIn
+                       )
+                       .Select(item => item.VillaId.ToString())
+                       .ToListAsync();
+
+                    query = query.Where(x => x.VillaDetails.Any(vd => vd.Name.Contains(model.Name)) && !notAvailibleVillaIds.Contains(x.Id.ToString()));
+                }
+                else if ((model.Person != null && model.Person > 0))
+                {
+                    // Sadece Kapasite
+                    query = query.Where(x => x.Person >= model.Person);
+                }
+                else if ((model.CheckIn != null && model.CheckIn >= DateTime.Now.Date) && (model.CheckOut != null && model.CheckOut > DateTime.Now.Date))
+                {
+                    // Sadece Giriş - Çıkış Tarihleri
+                    List<string> notAvailibleVillaIds = await context.Reservations
+                        .AsNoTracking()
+                        .Where(x =>
+                            x.GeneralStatusType == GeneralStatusType.Active
+                            && model.CheckIn < x.CheckOut
+                            && model.CheckOut > x.CheckIn
+                        )
+                        .Select(item => item.VillaId.ToString())
+                        .ToListAsync();
+                   
+                        query = query.Where(x => !notAvailibleVillaIds.Contains(x.Id.ToString()));
+                    //var ress = context.Reservations.Where(x => x.GeneralStatusType == GeneralStatusType.Active && model.CheckIn < x.CheckOut && model.CheckOut > x.CheckIn)
+                    //    .Select(item=>item.VillaId)
+                    //    .ToList();
+
+                    //query = query.Where(x=>!ress.Contains(x.Id));
+
+                }
+                else if (model.Name is not null)
+                {
+                    // Sadece villa veya apart adı
+                    query = query.Where(x => x.VillaDetails.Any(vd => vd.Name.Contains(model.Name)));
+                }
+                //else
+                //    return ResponseDto<ICollection<ClientVillaSearchGetAllResponseDto>>.Fail(new() { new() { Title = "Kayıt Bulunamadı..", Description = "Aradığınız Kriterlere Göre Tesis Bulunamadı.." } }, 400);
+
+                PageInfo pageInfo = GeneralFunctions.PageInfoHelper(Page: model.Pagination.Page, Size: model.Pagination.Size, TotalCount: await query.CountAsync());
+
+                ICollection<ClientVillaSearchGetAllResponseDto> getVillas = await query
+                    .Select(villa => new ClientVillaSearchGetAllResponseDto()
+                    {
+                        Name = villa.VillaDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Name,
+                        Bath = villa.Bath,
+                        Room = villa.Room,
+                        Person = villa.Person,
+                        OnlineReservation = villa.OnlineReservation,
+                        Slug = villa.Slug,
+                        VillaNumber = villa.VillaNumber,
+                        PriceType = villa.PriceType,
+                        CategoryMetaTitle = villa.VillaCategories.FirstOrDefault().Category.MetaTitle,
+                        CategoryMetaDescription = villa.VillaCategories.FirstOrDefault().Category.MetaDescription,
+                        FeatureTextWhite = villa.VillaDetails.FirstOrDefault(x => x.LanguageCode == model.Language).FeatureTextWhite,
+                        MinPrice = villa.PriceTables.Count > 0 ? villa.PriceTables.Min(x => x.Price) : 0,
+                        MaxPrice = villa.PriceTables.Count > 0 ? villa.PriceTables.Max(x => x.Price) : 0,
+                        Town = villa.Town.Name,
+                        District = villa.Town.District.Name,
+                        Photos = villa.Photos.OrderBy(x => x.Line).Take(3).Select(villaPhoto => new ClientVillaSearchGetAllResponseDtoPhotos()
+                        {
+                            Image = villaPhoto.Image,
+                        }).ToList()
+                    })
+                    .OrderBy(x => x.Name)
+                    .Skip(model.Pagination.Page * model.Pagination.Size)
+                    .Take(model.Pagination.Size)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                return ResponseDto<ICollection<ClientVillaSearchGetAllResponseDto>>.Success(getVillas, 200, pageInfo);
+            }
+            catch (Exception ex)
+            {
+                return ResponseDto<ICollection<ClientVillaSearchGetAllResponseDto>>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500);
+            }
+        }
 
         public async Task<ResponseDto<ICollection<ClientVillaGetAllByCategorySlugResponseDto>>> GetAllVillaByCategorySlug(ClientVillaGetAllByCategorySlugRequestDto model)
         {
@@ -971,7 +1106,6 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
         #endregion
 
         #region WebPages
-
 
         public async Task<ResponseDto<ICollection<ClienWebPageGetAllResponseDto>>> GetAllWebPage(ClientGetAllWebPageRequestDto model)
         {

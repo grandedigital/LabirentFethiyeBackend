@@ -14,6 +14,7 @@ namespace LabirentFethiye.Application.Abstracts.ProjectInterfaces
 
         #region Villa
         Task<ResponseDto<ICollection<ClientVillaGetAllByCategorySlugResponseDto>>> GetAllVillaByCategorySlug(ClientVillaGetAllByCategorySlugRequestDto model);
+        Task<ResponseDto<ICollection<ClientVillaSearchGetAllResponseDto>>> GetAllVillaSearch(ClientVillaSearchGetAllRequestDto model);
         Task<ResponseDto<ClientVillaGetBySlugResponseDto>> GetVillaBySlug(ClientVillaGetBySlugRequestDto model);
         Task<ResponseDto<ICollection<ClientVillaGetAllResponseDto>>> GetAllVilla(ClientVillaGetAllRequestDto model);
         Task<ResponseDto<ClientVillaGetResponseDto>> GetVilla(ClientVillaGetRequestDto model);

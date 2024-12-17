@@ -782,7 +782,11 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         return ResponseDto<ClientReservationCreateResponseDto>.Fail(new() { new() { Title = "Night Limit", Description = "En Az 5 Gece Rezervasyon Yapabilirsiniz." } }, 400);
                     //------
 
-                    if (await reservationService.IsAvailible(new() { CheckIn = model.CheckIn, CheckOut = model.CheckOut, VillaId = model.VillaId, RoomId = model.RoomId }))
+                    //if (await reservationService.IsAvailible(new() { CheckIn = model.CheckIn, CheckOut = model.CheckOut, VillaId = model.VillaId, RoomId = model.RoomId }))
+                    //    return ResponseDto<ClientReservationCreateResponseDto>.Fail(new() { new() { Title = "Tesis Müsait Değil", Description = "Tesis Belirtilen Tarihler İçin Müsait Değil.." } }, 400);
+                    var reservationIsAvailible = await ReservationIsAvailible(new() { CheckIn = model.CheckIn, CheckOut = model.CheckOut, VillaId = model.VillaId, RoomId = model.RoomId });
+
+                    if ((await ReservationIsAvailible(new() { CheckIn = model.CheckIn, CheckOut = model.CheckOut, VillaId = model.VillaId, RoomId = model.RoomId })).Errors?.Count > 0)
                         return ResponseDto<ClientReservationCreateResponseDto>.Fail(new() { new() { Title = "Tesis Müsait Değil", Description = "Tesis Belirtilen Tarihler İçin Müsait Değil.." } }, 400);
                     //-----
 
@@ -861,6 +865,18 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
         {
             try
             {
+                if (model.CheckIn.Date < DateTime.Now.Date)
+                    return ResponseDto<ClientReservationIsAvailibleResponseDto>.Fail(new() { new() { Title = "CheckIn Tarihi", Description = "CheckIn Tarihi geçmiş gün olamaz.." } }, 400);
+                if (model.CheckIn.Date > model.CheckOut.Date)
+                    return ResponseDto<ClientReservationIsAvailibleResponseDto>.Fail(new() { new() { Title = "CheckIn-CheckOut Tarihi", Description = "CheckIn Tarihi CheckOut tarihinden büyük olamaz.." } }, 400);
+                if (model.CheckIn.Date == model.CheckOut.Date)
+                    return ResponseDto<ClientReservationIsAvailibleResponseDto>.Fail(new() { new() { Title = "CheckIn-CheckOut Tarihi", Description = "CheckIn Tarihi CheckOut tarihine eşit olamaz.." } }, 400);
+                if (model.VillaId == Guid.Empty || model.RoomId == Guid.Empty)
+                    return ResponseDto<ClientReservationIsAvailibleResponseDto>.Fail(new() { new() { Title = "Tesis Id", Description = "Tesis Id boş olamaz" } }, 400);
+                if ((model.CheckOut.Date - model.CheckIn.Date).Days < 5)
+                    return ResponseDto<ClientReservationIsAvailibleResponseDto>.Fail(new() { new() { Title = "Night Limit", Description = "En Az 5 Gece Rezervasyon Yapabilirsiniz." } }, 400);
+                //------
+
                 ClientReservationIsAvailibleResponseDto response;
                 var resultIsAvailible = await reservationService.IsAvailible(new() { CheckIn = model.CheckIn, CheckOut = model.CheckOut, VillaId = model.VillaId, RoomId = model.RoomId });
                 if (resultIsAvailible)
@@ -881,7 +897,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         .ToList()
                     };
                 }
-                else return ResponseDto<ClientReservationIsAvailibleResponseDto>.Fail(new() { new() { Title = "Tesis Müsait Değil", Description = "Tesise Ait Fiyat Bulunamadı.." } }, 400);
+                else return ResponseDto<ClientReservationIsAvailibleResponseDto>.Fail(new() { new() { Title = "Tesis Müsait Değil", Description = "Tesis Belirtilen Tarihlerde Müsait Değil.." } }, 400);
 
 
                 return ResponseDto<ClientReservationIsAvailibleResponseDto>.Success(response, 200);

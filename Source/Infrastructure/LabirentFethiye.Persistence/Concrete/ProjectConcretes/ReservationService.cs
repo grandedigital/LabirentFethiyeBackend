@@ -1,5 +1,6 @@
 ﻿using LabirentFethiye.Application.Abstracts.ProjectInterfaces;
 using LabirentFethiye.Common.Dtos.GlobalDtos.MailDtos.MailRequestDtos;
+using LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientResponseDtos;
 using LabirentFethiye.Common.Dtos.ProjectDtos.ReservationDtos.ReservationRequestDtos;
 using LabirentFethiye.Common.Dtos.ProjectDtos.ReservationDtos.ReservationResponseDtos;
 using LabirentFethiye.Common.Enums;
@@ -37,9 +38,11 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                 if (model.VillaId == Guid.Empty || model.RoomId == Guid.Empty) return ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Create Villa or Room", Description = "Tesis Id boş olamaz" } }, 400);
                 //------
 
+                bool isAvalible = await IsAvailible(new() { CheckIn = model.CheckIn, CheckOut = model.CheckOut, VillaId = model.VillaId, RoomId = model.RoomId });
+
                 if (model.HomeOwner)
                 {
-                    if (!(await IsAvailible(new() { CheckIn = model.CheckIn, CheckOut = model.CheckOut, VillaId = model.VillaId, RoomId = model.RoomId })))
+                    if (!isAvalible)
                         return ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Is Available", Description = "Tesis Belirtilen Tarihler İçin Müsait Değil." } }, 400);
                     //-----
 
@@ -74,7 +77,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     if (model.Surname == null) return ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Create Villa or Room", Description = "Surname boş olamaz" } }, 400);
 
 
-                    if (!(await IsAvailible(new() { CheckIn = model.CheckIn, CheckOut = model.CheckOut, VillaId = model.VillaId, RoomId = model.RoomId })))
+                    if (!isAvalible)
                         return ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Is Available", Description = "Tesis Belirtilen Tarihler İçin Müsait Değil." } }, 400);
                     //-----
 
@@ -1322,6 +1325,19 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             try
             {
                 bool result = false;
+                if (model.CheckIn.Date < DateTime.Now.Date)
+                    return result = false;
+                if (model.CheckIn.Date > model.CheckOut.Date)
+                    return result = false;
+                if (model.CheckIn.Date == model.CheckOut.Date)
+                    return result = false;
+                if (model.VillaId == Guid.Empty || model.RoomId == Guid.Empty)
+                    return result = false;
+                if ((model.CheckOut.Date - model.CheckIn.Date).Days < 5)
+                    return result = false;
+                //------
+
+
                 if (model.VillaId != null)
                 {
                     if (model.ReservationId != null)

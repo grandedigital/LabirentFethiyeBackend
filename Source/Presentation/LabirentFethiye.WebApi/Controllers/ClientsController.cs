@@ -7,11 +7,6 @@ using LabirentFethiye.Persistence.Concrete.ProjectConcretes;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-
-
-
-
-
 namespace LabirentFethiye.WebApi.Controllers
 {
     [Route("api/[controller]/[action]")]

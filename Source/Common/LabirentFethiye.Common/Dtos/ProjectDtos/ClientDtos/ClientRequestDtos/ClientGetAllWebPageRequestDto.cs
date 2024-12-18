@@ -14,6 +14,6 @@ namespace LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientRequestDtos
         }
         public Pagination Pagination { get; set; }
         public string Language { get; set; }
-        public string MenuId { get; set; }
+        public string Slug { get; set; }
     }
 }

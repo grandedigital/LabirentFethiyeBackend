@@ -1113,7 +1113,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             {
                 var webPages = await context.WebPages
                    .AsNoTracking()
-                   .Where(wp => wp.GeneralStatusType == GeneralStatusType.Active && wp.MenuId == Guid.Parse(model.MenuId))
+                   .Where(wp => wp.GeneralStatusType == GeneralStatusType.Active && wp.Menu.Slug== model.Slug)
                    .Select(wp => new ClienWebPageGetAllResponseDto
                    {
                        Id = wp.Id,

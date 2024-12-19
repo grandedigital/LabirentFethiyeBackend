@@ -36,8 +36,8 @@ namespace LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientResponseDtos
         public PriceType PriceType { get; set; }
         public bool OnlineReservation { get; set; }
         public string Slug { get; set; }
-
-
+        public decimal MinPrice { get; set; }
+        public decimal MaxPrice { get; set; }
         public string Name { get; set; }
         public string FeatureTextWhite { get; set; }
 

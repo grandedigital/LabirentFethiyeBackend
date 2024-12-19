@@ -659,6 +659,8 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                             OnlineReservation = room.OnlineReservation,
                             //PriceType=room.PriceType,
                             PriceType = hotel.PriceType,
+                            MinPrice = room.PriceTables.Count > 0 ? room.PriceTables.Min(x => x.Price) : 0,
+                            MaxPrice = room.PriceTables.Count > 0 ? room.PriceTables.Max(x => x.Price) : 0,
                             Slug = room.Slug,
                             Photos = room.Photos.OrderBy(x => x.Line).Take(3).Select(roomPhoto => new ClientHotelGetResponseDtoRoomPhotos()
                             {

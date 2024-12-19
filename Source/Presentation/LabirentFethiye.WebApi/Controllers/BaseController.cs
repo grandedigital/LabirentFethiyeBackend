@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
+
+
 namespace LabirentFethiye.WebApi.Controllers
 {
     [Route("api/[controller]/[action]/{Id?}")]

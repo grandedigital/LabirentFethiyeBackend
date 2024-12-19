@@ -21,6 +21,7 @@ namespace LabirentFethiye.Application.Abstracts.ProjectInterfaces
         Task<ResponseDto<ICollection<ClientDistanceRulerByVillaSlugResponseDto>>> GetAllDistanceRulerByVillaSlug(ClientDistanceRulerByVillaSlugRequestDto model);
         Task<ResponseDto<ICollection<ClientPriceTableGetAllByVillaSlugResponseDto>>> GetAllPriceTableByVillaSlug(ClientPriceTableGetAllByVillaSlugRequestDto model);
         Task<ResponseDto<ICollection<ClientReservationCalendarGetByVillaSlugResponseDto>>> GetReservationCalendarByVillaSlug(ClientReservationCalendarGetByVillaSlugRequestDto model);
+        Task<ResponseDto<ICollection<ClientPriceDateGetAllByVillaSlugResponseDto>>> GetAllPriceDateByVillaSlug(ClientPriceDateGetAllByVillaSlugRequestDto model);
         Task<ResponseDto<ICollection<ClientCommentGetAllByVillaSlugResponseDto>>> GetAllCommentByVillaSlug(ClientCommentGetAllByVillaSlugRequestDto model);
         Task<ResponseDto<ICollection<ClientRecommendedVillaGetAllByVillaSlugResponseDto>>> GetAllRecommendedVilla(ClientRecommendedVillaGetAllByVillaSlugRequestDto model);
         Task<ResponseDto<BaseResponseDto>> CreateComment(ClientCommentCreateRequestDto model);

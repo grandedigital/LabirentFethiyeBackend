@@ -131,8 +131,8 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         )
                         .Select(item => item.VillaId.ToString())
                         .ToListAsync();
-                   
-                        query = query.Where(x => !notAvailibleVillaIds.Contains(x.Id.ToString()));
+
+                    query = query.Where(x => !notAvailibleVillaIds.Contains(x.Id.ToString()));
                     //var ress = context.Reservations.Where(x => x.GeneralStatusType == GeneralStatusType.Active && model.CheckIn < x.CheckOut && model.CheckOut > x.CheckIn)
                     //    .Select(item=>item.VillaId)
                     //    .ToList();
@@ -455,6 +455,29 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             catch (Exception ex)
             {
                 return ResponseDto<ICollection<ClientReservationCalendarGetByVillaSlugResponseDto>>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500);
+            }
+        }
+
+        public async Task<ResponseDto<ICollection<ClientPriceDateGetAllByVillaSlugResponseDto>>> GetAllPriceDateByVillaSlug(ClientPriceDateGetAllByVillaSlugRequestDto model)
+        {
+            try
+            {
+                ICollection<ClientPriceDateGetAllByVillaSlugResponseDto> getPriceDates = await context.PriceDates
+                    .Where(x => x.Villa.Slug == model.Slug && x.EndDate.Date >= DateTime.Now.Date)
+                    .Select(price => new ClientPriceDateGetAllByVillaSlugResponseDto()
+                    {
+                        StartDate = price.StartDate,
+                        EndDate = price.EndDate,
+                        Price = price.Price
+                    })
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                return ResponseDto<ICollection<ClientPriceDateGetAllByVillaSlugResponseDto>>.Success(getPriceDates, 200);
+            }
+            catch (Exception ex)
+            {
+                return ResponseDto<ICollection<ClientPriceDateGetAllByVillaSlugResponseDto>>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500);
             }
         }
 
@@ -1113,7 +1136,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             {
                 var webPages = await context.WebPages
                    .AsNoTracking()
-                   .Where(wp => wp.GeneralStatusType == GeneralStatusType.Active && wp.Menu.Slug== model.Slug)
+                   .Where(wp => wp.GeneralStatusType == GeneralStatusType.Active && wp.Menu.Slug == model.Slug)
                    .Select(wp => new ClienWebPageGetAllResponseDto
                    {
                        Id = wp.Id,

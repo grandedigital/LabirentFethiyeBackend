@@ -120,6 +120,18 @@ namespace LabirentFethiye.WebApi.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> GetAllPriceDateByVillaSlug([FromQuery] ClientPriceDateGetAllByVillaSlugRequestDto model)
+        {
+            try
+            {
+                var reservations = await clientService.GetAllPriceDateByVillaSlug(model);
+                return StatusCode(reservations.StatusCode, reservations);
+            }
+            catch (Exception ex)
+            { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500)); }
+        }
+
+        [HttpGet]
         public async Task<IActionResult> GetAllCommentByVillaSlug([FromQuery] ClientCommentGetAllByVillaSlugRequestDto model)
         {
             try

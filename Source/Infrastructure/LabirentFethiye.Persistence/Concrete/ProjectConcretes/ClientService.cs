@@ -1164,7 +1164,6 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                    .Where(wp => wp.GeneralStatusType == GeneralStatusType.Active && wp.Menu.Slug == model.Slug)
                    .Select(wp => new ClienWebPageGetAllResponseDto
                    {
-                       Id = wp.Id,
                        Slug = wp.Slug,
                        MetaTitle = wp.Menu.MetaTitle,
                        MetaDescription = wp.Menu.MetaDescription,

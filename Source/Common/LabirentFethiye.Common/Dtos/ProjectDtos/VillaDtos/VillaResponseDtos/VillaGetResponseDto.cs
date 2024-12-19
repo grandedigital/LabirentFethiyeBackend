@@ -52,6 +52,7 @@ namespace LabirentFethiye.Common.Dtos.ProjectDtos.VillaDtos.VillaResponseDtos
 
     public class VillaGetResponseDtoPersonal
     {
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public string SurName { get; set; }
         public string Phone { get; set; }

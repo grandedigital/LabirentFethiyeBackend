@@ -155,6 +155,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         PersonalId = villa.PersonalId,
                         Personal = new VillaGetResponseDtoPersonal()
                         {
+                            Id = villa.Personal.Id,
                             Name = villa.Personal.Name,
                             SurName = villa.Personal.SurName,
                             Phone = villa.Personal.PhoneNumber

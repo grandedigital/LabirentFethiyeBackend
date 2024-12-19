@@ -272,6 +272,19 @@ namespace LabirentFethiye.WebApi.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> GetAllPriceDateByRoomSlug([FromQuery] ClientPriceDateGetAllByRoomSlugRequestDto model)
+        {
+            try
+            {
+                var priceTables = await clientService.GetAllPriceDateByRoomSlug(model);
+                return StatusCode(priceTables.StatusCode, priceTables);
+            }
+            catch (Exception ex)
+            { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500)); }
+        }
+
+
+        [HttpGet]
         public async Task<IActionResult> GetAllCommentByRoomSlug([FromQuery] ClientCommentGetAllByHotelSlugRequestDto model)
         {
             try

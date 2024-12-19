@@ -38,7 +38,7 @@ namespace LabirentFethiye.Application.Abstracts.ProjectInterfaces
         Task<ResponseDto<ICollection<ClientPriceTableGetAllByRoomSlugResponseDto>>> GetAllPriceTableByRoomSlug(ClientPriceTableGetAllByRoomSlugRequestDto model);
         Task<ResponseDto<ICollection<ClientReservationCalendarGetByRoomSlugResponseDto>>> GetReservationCalendarByRoomSlug(ClientReservationCalendarGetByRoomSlugRequestDto model);
         Task<ResponseDto<ICollection<ClientCommentGetAllByHotelSlugResponseDto>>> GetAllCommentByHotelSlug(ClientCommentGetAllByHotelSlugRequestDto model);
-
+        Task<ResponseDto<ICollection<ClientPriceDateGetAllByRoomSlugResponseDto>>> GetAllPriceDateByRoomSlug(ClientPriceDateGetAllByRoomSlugRequestDto model);
         #endregion
 
         #region WebPages

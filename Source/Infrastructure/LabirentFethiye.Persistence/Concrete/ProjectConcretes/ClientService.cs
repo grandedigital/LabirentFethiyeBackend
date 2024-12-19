@@ -866,6 +866,29 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             }
         }
 
+        public async Task<ResponseDto<ICollection<ClientPriceDateGetAllByRoomSlugResponseDto>>> GetAllPriceDateByRoomSlug(ClientPriceDateGetAllByRoomSlugRequestDto model)
+        {
+            try
+            {
+                ICollection<ClientPriceDateGetAllByRoomSlugResponseDto> getPriceDates = await context.PriceDates
+                    .Where(x => x.Room.Slug == model.Slug && x.EndDate.Date >= DateTime.Now.Date)
+                    .Select(price => new ClientPriceDateGetAllByRoomSlugResponseDto()
+                    {
+                        StartDate = price.StartDate,
+                        EndDate = price.EndDate,
+                        Price = price.Price
+                    })
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                return ResponseDto<ICollection<ClientPriceDateGetAllByRoomSlugResponseDto>>.Success(getPriceDates, 200);
+            }
+            catch (Exception ex)
+            {
+                return ResponseDto<ICollection<ClientPriceDateGetAllByRoomSlugResponseDto>>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500);
+            }
+        }
+
         #endregion
 
         #region Reservation

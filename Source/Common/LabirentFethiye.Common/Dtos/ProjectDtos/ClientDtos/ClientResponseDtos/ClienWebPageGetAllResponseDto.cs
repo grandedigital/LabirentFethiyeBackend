@@ -1,8 +1,7 @@
 ﻿namespace LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientResponseDtos
 {
     public class ClienWebPageGetAllResponseDto
-    {
-        public Guid Id { get; set; }
+    {        
         public string MetaTitle { get; set; }
         public string MetaDescription { get; set; }
         public string Slug { get; set; }

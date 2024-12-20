@@ -641,8 +641,10 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         DescriptionLong = hotel.HotelDetails.FirstOrDefault(x => x.LanguageCode == model.Language).DescriptionLong,
                         MetaTitle = hotel.MetaTitle,
                         MetaDescription = hotel.MetaDescription,
-                        MinPrice = hotel.Rooms.SelectMany(room => room.PriceTables).Min(x => x.Price),
-                        MaxPrice = hotel.Rooms.SelectMany(room => room.PriceTables).Max(x => x.Price),
+
+                        MinPrice = hotel.Rooms.SelectMany(room => room.PriceTables).Count() > 0 ? hotel.Rooms.SelectMany(room => room.PriceTables).Min(x => x.Price) : 0,
+                        MaxPrice = hotel.Rooms.SelectMany(room => room.PriceTables).Count() > 0 ? hotel.Rooms.SelectMany(room => room.PriceTables).Max(x => x.Price) : 0,
+
                         Town = hotel.Town.Name,
                         District = hotel.Town.District.Name,
                         Photos = hotel.Photos.OrderBy(x => x.Line).Select(hotelPhoto => new ClientHotelGetResponseDtoPhotos()
@@ -695,8 +697,11 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         Person = room.Person,
                         Slug = room.Slug,
                         PriceType = room.PriceType,
-                        MinPrice = room.PriceTables.Min(x => x.Price),
-                        MaxPrice = room.PriceTables.Max(x => x.Price),
+
+                        MinPrice = room.PriceTables.Count > 0 ? room.PriceTables.Min(x => x.Price) : 0,
+                        MaxPrice = room.PriceTables.Count > 0 ? room.PriceTables.Max(x => x.Price) : 0,
+
+
                         Town = room.Hotel.Town.Name,
                         District = room.Hotel.Town.District.Name,
                         Photos = room.Photos.OrderBy(x => x.Line).Take(3).Select(roomPhoto => new ClientRoomGetResponseDtoPhotos()
@@ -723,6 +728,9 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     .Where(x => x.GeneralStatusType == GeneralStatusType.Active)
                     .OrderByDescending(x => x.Line)
                     .Include(x => x.HotelDetails)
+                    .Include(x => x.Rooms).ThenInclude(x => x.PriceTables)
+                    .Include(x => x.Photos)
+                    .Include(x => x.Town).ThenInclude(x => x.District)
                     .Select(hotel => new ClientHotelGetAllResponseDto()
                     {
                         Name = hotel.HotelDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Name,
@@ -732,8 +740,8 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         Slug = hotel.Slug,
                         PriceType = hotel.PriceType,
                         FeatureTextWhite = hotel.HotelDetails.FirstOrDefault(x => x.LanguageCode == model.Language).FeatureTextWhite,
-                        MinPrice = hotel.Rooms.SelectMany(room => room.PriceTables).Min(x => x.Price),
-                        MaxPrice = hotel.Rooms.SelectMany(room => room.PriceTables).Max(x => x.Price),
+                        MinPrice = hotel.Rooms.SelectMany(room => room.PriceTables).Count() > 0 ? hotel.Rooms.SelectMany(room => room.PriceTables).Min(x => x.Price) : 0,
+                        MaxPrice = hotel.Rooms.SelectMany(room => room.PriceTables).Count() > 0 ? hotel.Rooms.SelectMany(room => room.PriceTables).Max(x => x.Price) : 0,
                         Town = hotel.Town.Name,
                         District = hotel.Town.District.Name,
                         Photos = hotel.Photos.OrderBy(x => x.Line).Take(3).Select(hotelPhoto => new ClientHotelGetAllResponseDtoPhotos()

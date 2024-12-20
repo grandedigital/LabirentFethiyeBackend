@@ -724,13 +724,21 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
         {
             try
             {
-                ICollection<ClientHotelGetAllResponseDto> getHotels = await context.Hotels
-                    .Where(x => x.GeneralStatusType == GeneralStatusType.Active)
-                    .OrderByDescending(x => x.Line)
+                var query = context.Hotels
+                    .AsQueryable()
+                    .Where(x => x.GeneralStatusType == GeneralStatusType.Active);
+
+                query = query.OrderByDescending(x => x.Line);
+
+                PageInfo pageInfo = GeneralFunctions.PageInfoHelper(Page: model.Pagination.Page, Size: model.Pagination.Size, TotalCount: await query.CountAsync());
+
+                query = query
                     .Include(x => x.HotelDetails)
                     .Include(x => x.Rooms).ThenInclude(x => x.PriceTables)
                     .Include(x => x.Photos)
-                    .Include(x => x.Town).ThenInclude(x => x.District)
+                    .Include(x => x.Town).ThenInclude(x => x.District);
+
+                ICollection<ClientHotelGetAllResponseDto> getHotels = await query
                     .Select(hotel => new ClientHotelGetAllResponseDto()
                     {
                         Name = hotel.HotelDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Name,
@@ -754,7 +762,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     .AsNoTracking()
                     .ToListAsync();
 
-                return ResponseDto<ICollection<ClientHotelGetAllResponseDto>>.Success(getHotels, 200);
+                return ResponseDto<ICollection<ClientHotelGetAllResponseDto>>.Success(getHotels, 200, pageInfo);
             }
             catch (Exception ex)
             {

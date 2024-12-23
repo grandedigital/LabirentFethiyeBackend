@@ -14,8 +14,9 @@ namespace LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientRequestDtos
         
         public PriceType PriceType { get; set; }
 
-        public Guid? VillaId { get; set; }
-        public Guid? RoomId { get; set; }
+        //public Guid? VillaId { get; set; }
+        //public Guid? RoomId { get; set; }
+        public string Slug { get; set; }
 
         public string? IdNo { get; set; }
         public string? Name { get; set; }

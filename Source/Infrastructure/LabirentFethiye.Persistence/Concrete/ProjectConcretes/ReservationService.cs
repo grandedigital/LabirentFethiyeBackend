@@ -1282,7 +1282,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     return ResponseDto<GetReservationPriceResponseDto>.Fail(new() { new() { Title = "GetReservationPrice Errors..", Description = "CheckIn Tarihi CheckOut tarihinden büyük olamaz.." } }, 400);
                 if (model.CheckIn.Date == model.CheckOut.Date)
                     return ResponseDto<GetReservationPriceResponseDto>.Fail(new() { new() { Title = "GetReservationPrice Errors..", Description = "CheckIn Tarihi CheckOut tarihine eşit olamaz.." } }, 400);
-                if (model.VillaId == Guid.Empty || model.RoomId == Guid.Empty)
+                if (model.VillaId == Guid.Empty && model.RoomId == Guid.Empty)
                     return ResponseDto<GetReservationPriceResponseDto>.Fail(new() { new() { Title = "GetReservationPrice Errors..", Description = "Tesis Id boş olamaz" } }, 400);
                 //-----
 
@@ -1331,7 +1331,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     return result = false;
                 if (model.CheckIn.Date == model.CheckOut.Date)
                     return result = false;
-                if (model.VillaId == Guid.Empty || model.RoomId == Guid.Empty)
+                if (model.VillaId == null && model.RoomId == null)
                     return result = false;
                 if ((model.CheckOut.Date - model.CheckIn.Date).Days < 5)
                     return result = false;

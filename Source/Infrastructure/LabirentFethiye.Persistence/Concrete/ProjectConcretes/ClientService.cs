@@ -2,6 +2,7 @@
 using LabirentFethiye.Common.Dtos.GlobalDtos.DistrictDtos.DistrictResponseDtos;
 using LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientRequestDtos;
 using LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientResponseDtos;
+using LabirentFethiye.Common.Dtos.ProjectDtos.ReservationDtos.ReservationRequestDtos;
 using LabirentFethiye.Common.Dtos.ProjectDtos.ReservationDtos.ReservationResponseDtos;
 using LabirentFethiye.Common.Dtos.TownDtos.TownResponseDtos;
 using LabirentFethiye.Common.Enums;
@@ -975,21 +976,29 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         return ResponseDto<ClientReservationCreateResponseDto>.Fail(new() { new() { Title = "CheckIn-CheckOut Tarihi", Description = "CheckIn Tarihi CheckOut tarihinden büyük olamaz.." } }, 400);
                     if (model.CheckIn.Date == model.CheckOut.Date)
                         return ResponseDto<ClientReservationCreateResponseDto>.Fail(new() { new() { Title = "CheckIn-CheckOut Tarihi", Description = "CheckIn Tarihi CheckOut tarihine eşit olamaz.." } }, 400);
-                    if (model.VillaId == Guid.Empty || model.RoomId == Guid.Empty)
-                        return ResponseDto<ClientReservationCreateResponseDto>.Fail(new() { new() { Title = "Tesis Id", Description = "Tesis Id boş olamaz" } }, 400);
+                    if (model.Slug is null)
+                        return ResponseDto<ClientReservationCreateResponseDto>.Fail(new() { new() { Title = "Tesis Slug", Description = "Tesis Id boş olamaz" } }, 400);
                     if ((model.CheckOut.Date - model.CheckIn.Date).Days < 5)
                         return ResponseDto<ClientReservationCreateResponseDto>.Fail(new() { new() { Title = "Night Limit", Description = "En Az 5 Gece Rezervasyon Yapabilirsiniz." } }, 400);
                     //------
 
                     //if (await reservationService.IsAvailible(new() { CheckIn = model.CheckIn, CheckOut = model.CheckOut, VillaId = model.VillaId, RoomId = model.RoomId }))
                     //    return ResponseDto<ClientReservationCreateResponseDto>.Fail(new() { new() { Title = "Tesis Müsait Değil", Description = "Tesis Belirtilen Tarihler İçin Müsait Değil.." } }, 400);
-                    var reservationIsAvailible = await ReservationIsAvailible(new() { CheckIn = model.CheckIn, CheckOut = model.CheckOut, VillaId = model.VillaId, RoomId = model.RoomId });
 
-                    if ((await ReservationIsAvailible(new() { CheckIn = model.CheckIn, CheckOut = model.CheckOut, VillaId = model.VillaId, RoomId = model.RoomId })).Errors?.Count > 0)
+                    Guid VillaId = Guid.Empty, RoomId = Guid.Empty;
+                    VillaId = await context.Villas.Where(x => x.Slug == model.Slug).Select(item => item.Id).FirstOrDefaultAsync();
+                    if (VillaId == Guid.Empty)
+                        RoomId = await context.Rooms.Where(x => x.Slug == model.Slug).Select(item => item.Id).FirstOrDefaultAsync();
+
+
+
+                    var reservationIsAvailible = await ReservationIsAvailible(new() { CheckIn = model.CheckIn, CheckOut = model.CheckOut, Slug = model.Slug });
+
+                    if ((await ReservationIsAvailible(new() { CheckIn = model.CheckIn, CheckOut = model.CheckOut, Slug = model.Slug })).Errors?.Count > 0)
                         return ResponseDto<ClientReservationCreateResponseDto>.Fail(new() { new() { Title = "Tesis Müsait Değil", Description = "Tesis Belirtilen Tarihler İçin Müsait Değil.." } }, 400);
                     //-----
 
-                    var prices = await reservationService.GetReservationPrice(new() { VillaId = model.VillaId, RoomId = model.RoomId, CheckIn = model.CheckIn, CheckOut = model.CheckOut });
+                    var prices = await reservationService.GetReservationPrice(new() { VillaId = VillaId, RoomId = RoomId, CheckIn = model.CheckIn, CheckOut = model.CheckOut });
                     if (prices.StatusCode != 200) return ResponseDto<ClientReservationCreateResponseDto>.Fail(new() { new() { Title = "Tesis Müsait Değil", Description = "Tesise Ait Fiyat Bulunamadı.." } }, 400);
                     //-----
 
@@ -1011,8 +1020,8 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         Discount = 0,
                         Total = total,
 
-                        RoomId = model.RoomId,
-                        VillaId = model.VillaId,
+                        RoomId = RoomId,
+                        VillaId = VillaId,
                         GeneralStatusType = GeneralStatusType.Active,
                         CreatedAt = DateTime.Now,
 
@@ -1070,17 +1079,61 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     return ResponseDto<ClientReservationIsAvailibleResponseDto>.Fail(new() { new() { Title = "CheckIn-CheckOut Tarihi", Description = "CheckIn Tarihi CheckOut tarihinden büyük olamaz.." } }, 400);
                 if (model.CheckIn.Date == model.CheckOut.Date)
                     return ResponseDto<ClientReservationIsAvailibleResponseDto>.Fail(new() { new() { Title = "CheckIn-CheckOut Tarihi", Description = "CheckIn Tarihi CheckOut tarihine eşit olamaz.." } }, 400);
-                if (model.VillaId == Guid.Empty || model.RoomId == Guid.Empty)
-                    return ResponseDto<ClientReservationIsAvailibleResponseDto>.Fail(new() { new() { Title = "Tesis Id", Description = "Tesis Id boş olamaz" } }, 400);
+                if (model.Slug is null)
+                    return ResponseDto<ClientReservationIsAvailibleResponseDto>.Fail(new() { new() { Title = "Tesis Slug", Description = "Tesis Slug boş olamaz" } }, 400);
                 if ((model.CheckOut.Date - model.CheckIn.Date).Days < 5)
                     return ResponseDto<ClientReservationIsAvailibleResponseDto>.Fail(new() { new() { Title = "Night Limit", Description = "En Az 5 Gece Rezervasyon Yapabilirsiniz." } }, 400);
                 //------
 
                 ClientReservationIsAvailibleResponseDto response;
-                var resultIsAvailible = await reservationService.IsAvailible(new() { CheckIn = model.CheckIn, CheckOut = model.CheckOut, VillaId = model.VillaId, RoomId = model.RoomId });
+
+
+                //Guid VillaId = Guid.Empty, RoomId = Guid.Empty;
+                //VillaId = await context.Villas.Where(x => x.Slug == model.Slug).Select(item => item.Id).FirstOrDefaultAsync();
+                //if (VillaId == Guid.Empty)
+                //    RoomId = await context.Rooms.Where(x => x.Slug == model.Slug).Select(item => item.Id).FirstOrDefaultAsync();
+
+
+                //Guid? VillaId, RoomId;
+                //var villaId = await context.Villas.Where(x => x.Slug == model.Slug).Select(item => item.Id).FirstOrDefaultAsync();
+                //if (villaId != Guid.Empty) VillaId = villaId;
+                //else
+                //{
+                //    var roomId = await context.Rooms.Where(x => x.Slug == model.Slug).Select(item => item.Id).FirstOrDefaultAsync();
+                //    if (roomId != Guid.Empty) RoomId = roomId;
+                //}
+
+
+                //var resultIsAvailible = await reservationService.IsAvailible(new() { CheckIn = model.CheckIn, CheckOut = model.CheckOut, VillaId = (villaId != Guid.Empty ? VillaIdw: null), RoomId = RoomId });
+
+                Guid? VillaId = null, RoomId = null;
+
+                var villaId = await context.Villas
+                    .Where(x => x.Slug == model.Slug)
+                    .Select(item => item.Id)
+                    .FirstOrDefaultAsync();
+
+                if (villaId != Guid.Empty) VillaId = villaId;
+                else
+                {
+                    var roomId = await context.Rooms
+                        .Where(x => x.Slug == model.Slug)
+                        .Select(item => item.Id)
+                        .FirstOrDefaultAsync();
+
+                    if (roomId != Guid.Empty) RoomId = roomId;
+                }
+                var resultIsAvailible = await reservationService.IsAvailible(new()
+                {
+                    CheckIn = model.CheckIn,
+                    CheckOut = model.CheckOut,
+                    VillaId = VillaId,
+                    RoomId = RoomId
+                });
+
                 if (resultIsAvailible)
                 {
-                    var prices = await reservationService.GetReservationPrice(new() { VillaId = model.VillaId, RoomId = model.RoomId, CheckIn = model.CheckIn, CheckOut = model.CheckOut });
+                    var prices = await reservationService.GetReservationPrice(new() { VillaId = VillaId, RoomId = RoomId, CheckIn = model.CheckIn, CheckOut = model.CheckOut });
                     if (prices.StatusCode != 200) return ResponseDto<ClientReservationIsAvailibleResponseDto>.Fail(new() { new() { Title = "Tesis Müsait Değil", Description = "Tesise Ait Fiyat Bulunamadı.." } }, 400);
 
                     response = new()
@@ -1096,7 +1149,8 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         .ToList()
                     };
                 }
-                else return ResponseDto<ClientReservationIsAvailibleResponseDto>.Fail(new() { new() { Title = "Tesis Müsait Değil", Description = "Tesis Belirtilen Tarihlerde Müsait Değil.." } }, 400);
+                else
+                    return ResponseDto<ClientReservationIsAvailibleResponseDto>.Fail(new() { new() { Title = "Tesis Müsait Değil", Description = "Tesis Belirtilen Tarihlerde Müsait Değil.." } }, 400);
 
 
                 return ResponseDto<ClientReservationIsAvailibleResponseDto>.Success(response, 200);

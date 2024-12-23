@@ -146,7 +146,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     return ResponseDto<ICollection<PriceDateGetForDateResponseDto>>.Fail(new() { new() { Title = "GetReservationPrice Errors..", Description = "CheckIn Tarihi CheckOut tarihinden büyük olamaz.." } }, 400);
                 if (model.CheckIn.Date == model.CheckOut.Date)
                     return ResponseDto<ICollection<PriceDateGetForDateResponseDto>>.Fail(new() { new() { Title = "GetReservationPrice Errors..", Description = "CheckIn Tarihi CheckOut tarihine eşit olamaz.." } }, 400);
-                if (model.VillaId == Guid.Empty || model.RoomId == Guid.Empty)
+                if (model.VillaId == Guid.Empty && model.RoomId == Guid.Empty)
                     return ResponseDto<ICollection<PriceDateGetForDateResponseDto>>.Fail(new() { new() { Title = "GetReservationPrice Errors..", Description = "Tesis Id boş olamaz" } }, 400);
                 //-----
 
@@ -165,7 +165,12 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     query = query.Where(x => x.RoomId == model.RoomId);
 
                 List<PriceDate> priceDates = await query
-                    .Where(x => (model.CheckIn < x.EndDate && model.CheckIn > x.StartDate) || (model.CheckOut < x.EndDate && model.CheckOut > x.StartDate))
+                    //.Where(x => (model.CheckIn < x.EndDate && model.CheckIn > x.StartDate) || (model.CheckOut < x.EndDate && model.CheckOut > x.StartDate))
+                    .Where(x =>
+                        (model.CheckIn <= x.EndDate && model.CheckIn >= x.StartDate) ||
+                        (model.CheckOut <= x.EndDate && model.CheckOut >= x.StartDate) ||
+                        (model.CheckIn <= x.StartDate && model.CheckOut >= x.EndDate)
+                    )
                     .OrderBy(x => x.StartDate)
                     .AsNoTracking()
                     .ToListAsync();

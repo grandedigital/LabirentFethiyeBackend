@@ -1020,8 +1020,8 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         Discount = 0,
                         Total = total,
 
-                        RoomId = RoomId,
-                        VillaId = VillaId,
+                        RoomId = RoomId != Guid.Empty ? RoomId : null,
+                        VillaId = VillaId != Guid.Empty ? VillaId : null,
                         GeneralStatusType = GeneralStatusType.Active,
                         CreatedAt = DateTime.Now,
 

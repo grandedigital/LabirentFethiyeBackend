@@ -2,6 +2,7 @@
 using LabirentFethiye.Common.Dtos.GlobalDtos.DistrictDtos.DistrictResponseDtos;
 using LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientRequestDtos;
 using LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientResponseDtos;
+using LabirentFethiye.Common.Dtos.ProjectDtos.PriceDateDtos.PriceDateResponseDtos;
 using LabirentFethiye.Common.Dtos.ProjectDtos.ReservationDtos.ReservationRequestDtos;
 using LabirentFethiye.Common.Dtos.ProjectDtos.ReservationDtos.ReservationResponseDtos;
 using LabirentFethiye.Common.Dtos.TownDtos.TownResponseDtos;
@@ -151,6 +152,10 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
 
                 PageInfo pageInfo = GeneralFunctions.PageInfoHelper(Page: model.Pagination.Page, Size: model.Pagination.Size, TotalCount: await query.CountAsync());
 
+                //var  price = await _reservationService.GetReservationPrice(new() { CheckIn = Convert.ToDateTime(model.CheckIn), CheckOut = Convert.ToDateTime(model.CheckOut), VillaId = v.Id });
+
+
+
                 ICollection<ClientVillaSearchGetAllResponseDto> getVillas = await query
                     .Select(villa => new ClientVillaSearchGetAllResponseDto()
                     {
@@ -172,7 +177,8 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         Photos = villa.Photos.OrderBy(x => x.Line).Take(3).Select(villaPhoto => new ClientVillaSearchGetAllResponseDtoPhotos()
                         {
                             Image = villaPhoto.Image,
-                        }).ToList()
+                        }).ToList(),
+
                     })
                     .OrderBy(x => x.Name)
                     .Skip(model.Pagination.Page * model.Pagination.Size)
@@ -1177,6 +1183,23 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             }
         }
 
+        public async Task<ResponseDto<ClientReservationGetPriceResponseDto>> ReservationGetPrice(ClientReservationGetPriceRequestDto model)
+        {
+            try
+            {
+                Guid villaId = (await context.Villas.FirstOrDefaultAsync(x => x.Slug == model.Slug)).Id;
+
+                var prices = await reservationService.GetReservationPrice(new() { VillaId = villaId, RoomId = null, CheckIn = model.CheckIn, CheckOut = model.CheckOut });
+                if (prices.StatusCode != 200) return ResponseDto<ClientReservationGetPriceResponseDto>.Success(new() { Price = 0 }, 400);
+
+                return ResponseDto<ClientReservationGetPriceResponseDto>.Success(new() { Price = prices.Data.Total }, 400);
+
+            }
+            catch (Exception ex)
+            {
+                return ResponseDto<ClientReservationGetPriceResponseDto>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500);
+            }
+        }
         #endregion
 
         #region Currency
@@ -1316,6 +1339,29 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
         }
 
         #endregion
+
+        public decimal CalculatePriceForDate(List<CalculatePriceForDate> model, DateTime? checkIn, DateTime? checkOut)
+        {
+            decimal total = 0;
+            if (model.Count > 0 && checkIn != null && checkOut != null)
+            {
+                //List<PriceDateGetForDateResponseDto> response = new List<PriceDateGetForDateResponseDto>();
+                DateTime fakeDay = DateTime.Parse(checkIn.ToString());
+                foreach (var price in model)
+                {
+                    while (fakeDay >= price.StartDate && fakeDay <= price.EndDate)
+                    {
+                        if (fakeDay > checkOut) break;
+                        //response.Add(new() { Date = fakeDay, Price = price.Price });
+                        total = total + price.Price;
+                        fakeDay = fakeDay.AddDays(1);
+                    }
+                }
+                //return ResponseDto<ICollection<PriceDateGetForDateResponseDto>>.Success(response, 200);
+            }
+
+            return total;
+        }
 
     }
 }

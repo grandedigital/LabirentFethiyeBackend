@@ -16,6 +16,7 @@ namespace LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientResponseDtos
         public string CategoryMetaTitle { get; set; }
         public string CategoryMetaDescription { get; set; }
 
+        public decimal Price { get; set; }
         public decimal MinPrice { get; set; }
         public decimal MaxPrice { get; set; }
 

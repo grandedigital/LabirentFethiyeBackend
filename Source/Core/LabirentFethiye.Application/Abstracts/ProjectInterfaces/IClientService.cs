@@ -51,6 +51,7 @@ namespace LabirentFethiye.Application.Abstracts.ProjectInterfaces
         Task<ResponseDto<ClientReservationGetResponseDto>> GetReservation(ClientReservationGetRequestDto model);
         Task<ResponseDto<ClientReservationCreateResponseDto>> ReservationCreate(ClientReservationCreateRequestDto model);
         Task<ResponseDto<ClientReservationIsAvailibleResponseDto>> ReservationIsAvailible(ClientReservationIsAvailibleRequestDto model);
+        Task<ResponseDto<ClientReservationGetPriceResponseDto>> ReservationGetPrice(ClientReservationGetPriceRequestDto model);
 
         #endregion
 

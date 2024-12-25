@@ -334,6 +334,18 @@ namespace LabirentFethiye.WebApi.Controllers
             catch (Exception ex)
             { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500)); }
         }
+        
+        [HttpGet]
+        public async Task<IActionResult> ReservationGetPrice([FromQuery] ClientReservationGetPriceRequestDto model)
+        {
+            try
+            {
+                var reservationPrice = await clientService.ReservationGetPrice(model);
+                return StatusCode(200, reservationPrice);
+            }
+            catch (Exception ex)
+            { return StatusCode((int)HttpStatusCode.BadRequest, ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Exception Errors..", Description = ex.Message.ToString() } }, 500)); }
+        }
         #endregion
 
         #region WebPages

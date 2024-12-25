@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
 {
@@ -605,6 +606,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     .Select(villa => new ClientVillaSaleGetAllResponseDto()
                     {
                         Name = villa.VillaDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Name,
+                        DescriptionShort = villa.VillaDetails.FirstOrDefault(x => x.LanguageCode == model.Language).DescriptionShort,
                         Bath = villa.Bath,
                         Room = villa.Room,
                         Person = villa.Person,

@@ -6,6 +6,7 @@ namespace LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientResponseDtos
     {
         public string Name { get; set; }
         public string FeatureTextWhite { get; set; }
+        public string DescriptionShort { get; set; }
         public string Slug { get; set; }
         public UInt16 Room { get; set; }
         public UInt16 Person { get; set; }

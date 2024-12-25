@@ -587,9 +587,15 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
         {
             try
             {
-                ICollection<ClientVillaSaleGetAllResponseDto> getVillas = await context.Villas
-                    .Where(x => x.GeneralStatusType == GeneralStatusType.Active && x.IsSale == true)
-                    .OrderByDescending(x => x.Line)
+                var query = context.Villas
+                   .AsQueryable()
+                   .Where(x => x.GeneralStatusType == GeneralStatusType.Active && x.IsSale == true);
+
+                query = query.OrderByDescending(x => x.Line);
+
+                PageInfo pageInfo = GeneralFunctions.PageInfoHelper(Page: model.Pagination.Page, Size: model.Pagination.Size, TotalCount: await query.CountAsync());
+
+                ICollection<ClientVillaSaleGetAllResponseDto> getVillas = await query
                     .Select(villa => new ClientVillaSaleGetAllResponseDto()
                     {
                         Name = villa.VillaDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Name,
@@ -611,7 +617,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     .AsNoTracking()
                     .ToListAsync();
 
-                return ResponseDto<ICollection<ClientVillaSaleGetAllResponseDto>>.Success(getVillas, 200);
+                return ResponseDto<ICollection<ClientVillaSaleGetAllResponseDto>>.Success(getVillas, 200, pageInfo);
             }
             catch (Exception ex)
             {

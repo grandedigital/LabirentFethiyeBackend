@@ -21,8 +21,18 @@ namespace LabirentFethiye.Common.Dtos.ProjectDtos.ClientDtos.ClientResponseDtos
         public string Town { get; set; }
         public string District { get; set; }
 
+        public List<ClientHotelGetResponseDtoComment> Comments { get; set; }
         public List<ClientHotelGetResponseDtoRoom> Rooms { get; set; }
         public ICollection<ClientHotelGetResponseDtoPhotos> Photos { get; set; }
+    }
+    public class ClientHotelGetResponseDtoComment
+    {
+        public string Title { get; set; }
+        public string CommentText { get; set; }
+        public decimal Rating { get; set; }
+        public string Video { get; set; }
+        public string Name { get; set; }
+        public string SurName { get; set; }
     }
     public class ClientHotelGetResponseDtoPhotos
     {

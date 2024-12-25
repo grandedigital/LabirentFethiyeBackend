@@ -631,6 +631,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     .Where(x => x.Slug == model.Slug && x.GeneralStatusType == GeneralStatusType.Active)
                     .OrderByDescending(x => x.Line)
                     .Include(x => x.HotelDetails)
+                    .Include(x => x.Comments)
                     .Select(hotel => new ClientHotelGetResponseDto()
                     {
                         Name = hotel.HotelDetails.FirstOrDefault(x => x.LanguageCode == model.Language).Name,
@@ -669,6 +670,15 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                             {
                                 Image = roomPhoto.Image
                             }).ToList()
+                        }).ToList(),
+                        Comments = hotel.Comments.Select(comment => new ClientHotelGetResponseDtoComment()
+                        {
+                            Name = comment.Name,
+                            SurName = comment.SurName,
+                            Title = comment.Title,
+                            CommentText = comment.CommentText,
+                            Rating = comment.Rating,
+                            Video = comment.Video
                         }).ToList()
                     })
                     .AsNoTracking()

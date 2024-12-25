@@ -21,8 +21,8 @@ namespace LabirentFethiye.Common.Dtos.GlobalDtos.MailDtos.MailRequestDtos
         public decimal Discount { get; set; }
         public decimal Total { get; set; }
 
-        public ReservationCreateMailRequestDtoVilla Villa { get; set; }
-        public ReservationCreateMailRequestDtoRoom Room { get; set; }
+        public ReservationCreateMailRequestDtoVilla? Villa { get; set; }
+        public ReservationCreateMailRequestDtoRoom? Room { get; set; }
         public ReservationCreateMailRequestDtoReservationInfos ReservationInfo { get; set; }
         //public ICollection<ReservationCreateMailRequestDtoReservationItems> ReservationItems { get; set; }
     }

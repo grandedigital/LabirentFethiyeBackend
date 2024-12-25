@@ -148,8 +148,19 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     //------
 
                     // Mail sender
-                    if (reservation.ReservationChannalType == ReservationChannalType.WebSite)
+                    if (reservation.ReservationChannalType == ReservationChannalType.Manuel)
                     {
+                        Villa villa = null;
+                        Room room = null;
+                        if (model.VillaId == Guid.Empty || model.VillaId != null)
+                        {
+                            villa = await context.Villas.Include(x => x.VillaDetails).Where(x => x.Id == model.VillaId).FirstOrDefaultAsync();
+                        }
+                        else
+                        {
+                            room = await context.Rooms.Include(x => x.Hotel).ThenInclude(x => x.HotelDetails).Include(x => x.RoomDetails).Where(x => x.Id == model.RoomId).FirstOrDefaultAsync();
+
+                        }
                         ReservationCreateMailRequestDto reservationCreateMailRequestDto = new()
                         {
                             ReservationNumber = reservation.ReservationNumber,
@@ -161,17 +172,17 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                             ReservationStatusType = reservation.ReservationStatusType,
                             IsDepositPrice = reservation.IsDepositPrice,
                             IsCleaningPrice = reservation.IsCleaningPrice,
-                            Villa = new ReservationCreateMailRequestDtoVilla()
+                            Villa = villa != null ? new ReservationCreateMailRequestDtoVilla()
                             {
                                 Name = reservation.Villa.VillaDetails.FirstOrDefault().Name,
                                 Person = reservation.Villa.Person
-                            },
-                            Room = new ReservationCreateMailRequestDtoRoom()
+                            } : null,
+                            Room = room != null ? new ReservationCreateMailRequestDtoRoom()
                             {
                                 HotelName = reservation.Room.Hotel.HotelDetails.FirstOrDefault().Name,
                                 Name = reservation.Room.RoomDetails.FirstOrDefault().Name,
                                 Person = reservation.Room.Person
-                            },
+                            } : null,
                             ReservationInfo = new ReservationCreateMailRequestDtoReservationInfos()
                             {
                                 Name = reservation.ReservationInfos.FirstOrDefault().Name,

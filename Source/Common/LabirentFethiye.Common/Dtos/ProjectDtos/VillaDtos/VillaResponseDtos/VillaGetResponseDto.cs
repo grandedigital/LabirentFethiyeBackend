@@ -42,10 +42,10 @@ namespace LabirentFethiye.Common.Dtos.ProjectDtos.VillaDtos.VillaResponseDtos
 
         public List<VillaGetResponseDtoPayments> Payments { get; set; }
         public Guid TownId { get; set; }
-        public TownGetResponseDto Town { get; set; }
+        public TownGetResponseDto? Town { get; set; }
 
         public Guid? PersonalId { get; set; }
-        public VillaGetResponseDtoPersonal Personal { get; set; }
+        public VillaGetResponseDtoPersonal? Personal { get; set; }
 
         public GeneralStatusType GeneralStatusType { get; set; }
     }
@@ -73,7 +73,7 @@ namespace LabirentFethiye.Common.Dtos.ProjectDtos.VillaDtos.VillaResponseDtos
     }
     public class VillaGetResponseDtoCategories
     {
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
         public List<VillaGetResponseDtoCategoriesDetail>? CategoryDetails { get; set; }
     }
     public class VillaGetResponseDtoCategoriesDetail
@@ -82,7 +82,7 @@ namespace LabirentFethiye.Common.Dtos.ProjectDtos.VillaDtos.VillaResponseDtos
     }
     public class VillaGetResponseDtoVillaDetail
     {
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
         public string LanguageCode { get; set; }
         public string Name { get; set; }
         public string DescriptionShort { get; set; }

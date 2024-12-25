@@ -127,6 +127,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     .Include(x => x.VillaCategories).ThenInclude(x => x.Category)
                     .Include(x => x.Town).ThenInclude(x => x.District).ThenInclude(x => x.City)
                     .Include(x => x.Photos.OrderBy(x => x.Line))
+                    .Include(x => x.Personal)
                     .Where(x => x.Id == Id)
                     .Select(villa => new VillaGetResponseDto()
                     {
@@ -153,29 +154,36 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         WifiPassword = villa.WifiPassword,
                         TownId = villa.TownId,
                         PersonalId = villa.PersonalId,
-                        Personal = new VillaGetResponseDtoPersonal()
+                        //Personal = new VillaGetResponseDtoPersonal()
+                        //{
+                        //    Id = villa.Personal.Id,
+                        //    Name = villa.Personal.Name,
+                        //    SurName = villa.Personal.SurName,
+                        //    Phone = villa.Personal.PhoneNumber
+                        //},
+                        Personal = villa.Personal != null ? new VillaGetResponseDtoPersonal()
                         {
                             Id = villa.Personal.Id,
                             Name = villa.Personal.Name,
                             SurName = villa.Personal.SurName,
                             Phone = villa.Personal.PhoneNumber
-                        },
-                        Town = new TownGetResponseDto()
+                        } : null,
+                        Town = villa.Town != null ? new TownGetResponseDto()
                         {
                             Id = villa.Town.Id,
                             Name = villa.Town.Name,
                             DistrictId = villa.Town.DistrictId,
-                            District = new DistrictGetResponseDto()
+                            District = villa.Town.District != null ? new DistrictGetResponseDto()
                             {
                                 Name = villa.Town.District.Name,
                                 CityId = villa.Town.District.City.Id,
-                                City = new CityGetResponseDto()
+                                City = villa.Town.District.City != null ? new CityGetResponseDto()
                                 {
                                     Name = villa.Town.District.City.Name,
                                     CityNumber = villa.Town.District.City.CityNumber,
-                                }
-                            }
-                        },
+                                } : null
+                            } : null
+                        } : null,
                         VillaDetails = villa.VillaDetails.Select(villaDetail => new VillaGetResponseDtoVillaDetail()
                         {
                             Id = villaDetail.Id,

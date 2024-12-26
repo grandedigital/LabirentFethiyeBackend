@@ -17,7 +17,7 @@ namespace LabirentFethiye.WebApi.Controllers
             this.userService = userService;
         }
 
-        [Authorize(Roles = "SuperAdmin,Admin")]
+        //[Authorize(Roles = "SuperAdmin,Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] UserGetAllRequestDto requestModel)
         {
@@ -32,7 +32,7 @@ namespace LabirentFethiye.WebApi.Controllers
             }
         }
 
-        [Authorize(Roles = "SuperAdmin,Admin")]
+        //[Authorize(Roles = "SuperAdmin,Admin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromForm, FromBody] UserCreateRequestDto model)
         {
@@ -47,7 +47,7 @@ namespace LabirentFethiye.WebApi.Controllers
             }
         }
 
-        [Authorize(Roles = "SuperAdmin,Admin")]
+        //[Authorize(Roles = "SuperAdmin,Admin")]
         [HttpPost]
         public async Task<IActionResult> UserRoleAsign([FromForm, FromBody] UserRoleAsignRequestDto model)
         {

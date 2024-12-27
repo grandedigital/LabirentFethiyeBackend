@@ -71,7 +71,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     return ResponseDto<BaseResponseDto>.Success(new() { Id = reservation.Id }, 200);
                 }
                 else
-                {
+                {                    
                     if (model.IdNo == null) return ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Create Villa or Room", Description = "IdNo boş olamaz" } }, 400);
                     if (model.Name == null) return ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Create Villa or Room", Description = "Name boş olamaz" } }, 400);
                     if (model.Surname == null) return ResponseDto<BaseResponseDto>.Fail(new() { new() { Title = "Create Villa or Room", Description = "Surname boş olamaz" } }, 400);
@@ -1344,10 +1344,8 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     return result = false;
                 if (model.VillaId == null && model.RoomId == null)
                     return result = false;
-                if ((model.CheckOut.Date - model.CheckIn.Date).Days < 5)
-                    return result = false;
+                //if ((model.CheckOut.Date - model.CheckIn.Date).Days < 5) return result = false;
                 //------
-
 
                 if (model.VillaId != null)
                 {

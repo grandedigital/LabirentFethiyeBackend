@@ -169,12 +169,18 @@ namespace LabirentFethiye.Persistence.Concrete.WebsiteConcretes
             {
                 List<WebPageGetAllResponseDto> getAll = new List<WebPageGetAllResponseDto>();
 
+                var query = context.WebPages.AsQueryable();
+
                 if (!String.IsNullOrEmpty(model.slug))
                 {
-                    getAll = await context.WebPages
-                       .Where(x => x.Menu.Slug == model.slug)
-                       .Include(x => x.WebPageDetails)
-                       .Include(x => x.Menu).ThenInclude(x => x.MenuDetails)
+                    query = query
+                        .Where(x => x.Menu.Slug == model.slug)
+                        .Include(x => x.WebPageDetails)
+                        .Include(x => x.Menu).ThenInclude(x => x.MenuDetails);
+
+                    PageInfo pageInfo = GeneralFunctions.PageInfoHelper(Page: model.Pagination.Page, Size: model.Pagination.Size, TotalCount: await query.CountAsync());
+
+                    getAll = await query
                        .OrderByDescending(x => x.CreatedAt)
                        .Select(webPage => new WebPageGetAllResponseDto()
                        {
@@ -211,12 +217,17 @@ namespace LabirentFethiye.Persistence.Concrete.WebsiteConcretes
                        .AsNoTracking()
                        .ToListAsync();
 
+                    return ResponseDto<ICollection<WebPageGetAllResponseDto>>.Success(getAll, 200, pageInfo);
                 }
                 else
                 {
-                    getAll = await context.WebPages
-                         .Include(x => x.WebPageDetails)
-                         .Include(x => x.Menu).ThenInclude(x => x.MenuDetails)
+                    query = query
+                        .Include(x => x.WebPageDetails)
+                        .Include(x => x.Menu).ThenInclude(x => x.MenuDetails);
+
+                    PageInfo pageInfo = GeneralFunctions.PageInfoHelper(Page: model.Pagination.Page, Size: model.Pagination.Size, TotalCount: await query.CountAsync());
+
+                    getAll = await query
                          .OrderByDescending(x => x.CreatedAt)
                          .Select(webPage => new WebPageGetAllResponseDto()
                          {
@@ -252,9 +263,11 @@ namespace LabirentFethiye.Persistence.Concrete.WebsiteConcretes
                          .Take(model.Pagination.Size)
                          .AsNoTracking()
                          .ToListAsync();
+
+                    return ResponseDto<ICollection<WebPageGetAllResponseDto>>.Success(getAll, 200, pageInfo);
+
                 }
 
-                return ResponseDto<ICollection<WebPageGetAllResponseDto>>.Success(getAll, 200);
 
             }
             catch (Exception ex)

@@ -235,8 +235,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             try
             {
                 var query = context.Villas
-                    .AsQueryable()
-                    .Where(x => x.GeneralStatusType == GeneralStatusType.Active);
+                    .AsQueryable();                    
 
                 if (model.SearchName is not null)
                     query = query.Where(x => x.VillaDetails.Any(x => x.Name.Contains(model.SearchName)));

@@ -97,7 +97,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             try
             {
                 var getAllReservationInfo = await context.ReservationInfos
-                    .Where(x => x.ReservationId == ReservationId && x.GeneralStatusType == GeneralStatusType.Active)
+                    .Where(x => x.ReservationId == ReservationId)
                     .Select(reservationInfo => new ReservationInfoGetAllResponseDto()
                     {
                         Id = reservationInfo.Id,

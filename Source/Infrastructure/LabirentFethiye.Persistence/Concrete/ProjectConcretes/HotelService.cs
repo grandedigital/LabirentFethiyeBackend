@@ -173,8 +173,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
             try
             {
                 var query = context.Hotels
-                    .AsQueryable()
-                    .Where(x => x.GeneralStatusType == GeneralStatusType.Active);
+                    .AsQueryable();
 
                 if (model.SearchName is not null)
                     query = query.Where(x => x.HotelDetails.Any(x => x.Name.ToLower().Contains(model.SearchName.ToLower())));

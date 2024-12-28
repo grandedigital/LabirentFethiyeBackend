@@ -305,8 +305,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
 
                 var query = context.Reservations
                     .AsNoTracking()
-                    .AsQueryable()
-                    .Where(x => x.GeneralStatusType == GeneralStatusType.Active);
+                    .AsQueryable();
 
 
                 if (!model.HomeOwner && model.AgencyOwner)
@@ -1034,7 +1033,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                 var query = context.Reservations
                       .AsNoTracking()
                       .AsQueryable()
-                      .Where(x => x.GeneralStatusType == GeneralStatusType.Active && x.RoomId == model.RoomId);
+                      .Where(x => x.RoomId == model.RoomId);
 
 
                 if (!model.HomeOwner && model.AgencyOwner)
@@ -1162,7 +1161,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                 var query = context.Reservations
                        .AsNoTracking()
                        .AsQueryable()
-                       .Where(x => x.GeneralStatusType == GeneralStatusType.Active && x.VillaId == model.VillaId);
+                       .Where(x => x.VillaId == model.VillaId);
 
 
                 if (!model.HomeOwner && model.AgencyOwner)

@@ -160,9 +160,9 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     query = query.Where(x => x.Id != model.Id);
 
                 if (model.VillaId is not null)
-                    query = query.Where(x => x.VillaId == model.VillaId);
+                    query = query.Where(x => x.VillaId == model.VillaId).Include(x => x.Villa);
                 else if (model.RoomId is not null)
-                    query = query.Where(x => x.RoomId == model.RoomId);
+                    query = query.Where(x => x.RoomId == model.RoomId).Include(x => x.Room);
 
                 List<PriceDate> priceDates = await query
                     //.Where(x => (model.CheckIn < x.EndDate && model.CheckIn > x.StartDate) || (model.CheckOut < x.EndDate && model.CheckOut > x.StartDate))
@@ -185,7 +185,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         while (fakeDay >= price.StartDate && fakeDay <= price.EndDate)
                         {
                             if (fakeDay > model.CheckOut) break;
-                            response.Add(new() { Date = fakeDay, Price = price.Price, PriceType = price.Villa != null ? price.Villa.PriceType : PriceType.TL });
+                            response.Add(new() { Date = fakeDay, Price = price.Price, PriceType = price.Villa != null ? price.Villa.PriceType : price.Room != null ? price.Room.PriceType : PriceType.TL });
                             fakeDay = fakeDay.AddDays(1);
                         }
                     }

@@ -103,7 +103,7 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                         IsDepositPrice = model.IsDepositPrice,
                         IsCleaningPrice = model.IsCleaningPrice,
                         HomeOwner = false,
-
+                        
                         Amount = prices.Data.Amount,
                         PriceType = prices.Data.PriceType,
                         ExtraPrice = prices.Data.ExtraPrice,

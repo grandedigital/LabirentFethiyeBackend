@@ -1296,14 +1296,15 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     return ResponseDto<GetReservationPriceResponseDto>.Fail(new() { new() { Title = "GetReservationPrice Errors..", Description = "Tesis Id boş olamaz" } }, 400);
                 //-----
 
-                // Todo: Ocak ayında fiyat var ama Şubat ayında fiyat yok. CheckIn=30 ocak => CheckOut => 4 Şubat için ocak fiyatı geliyor ama şubat fiyatı olamığı için gelmiyor. Bu durum kontrol edilecek..
                 var prices = await priceDateService.GetPriceForDate(new() { VillaId = model.VillaId, RoomId = model.RoomId, CheckIn = model.CheckIn, CheckOut = model.CheckOut });
 
                 if (prices.StatusCode != 200 || prices.Data?.Count == 0)
                     return ResponseDto<GetReservationPriceResponseDto>.Fail(new() { new() { Title = "GetReservationPrice Errors..", Description = "Tesise Ait Fiyat Bulunamadı.." } }, 400);
                 //-----
 
-                PriceType priceType = PriceType.TL; // Todo: bu kontrol edilecek
+                
+
+                PriceType priceType = PriceType.TL; 
                 decimal amount = 0, extra = 0;
                 List<GetReservationPriceResponseDtoReservationPriceDay> days = new() { };
 
@@ -1343,7 +1344,6 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
                     return result = false;
                 if (model.VillaId == null && model.RoomId == null)
                     return result = false;
-                //if ((model.CheckOut.Date - model.CheckIn.Date).Days < 5) return result = false;
                 //------
 
                 if (model.VillaId != null)

@@ -177,6 +177,11 @@ namespace LabirentFethiye.Persistence.Concrete.ProjectConcretes
 
                 if (priceDates.Count > 0)
                 {
+                    if(!priceDates.Any(x => x.EndDate >= model.CheckOut))
+                    {
+                        return ResponseDto<ICollection<PriceDateGetForDateResponseDto>>.Fail(new() { new() { Title = "Fiyat Bulunamadı..", Description = "Tesise Ait İlgili Tarihlerin İçin Fiyat Bulunamadı.." } }, 400);
+                    }
+
                     List<PriceDateGetForDateResponseDto> response = new List<PriceDateGetForDateResponseDto>();
 
                     DateTime fakeDay = model.CheckIn;
